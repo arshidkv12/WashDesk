@@ -16,7 +16,7 @@
     let imagePreview = $state('');
     let fileInput: HTMLInputElement;
 
-    let { product } = $props();
+    let { service } = $props();
 
     let form = $state({
         name: '',
@@ -30,8 +30,8 @@
     });
 
     onMount(()=>{
-        form = product;
-        form.status = product.status ? '1' : '0';
+        form = service;
+        form.status = service.status ? '1' : '0';
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -40,12 +40,12 @@
             href: '/dashboard',
         },
         {
-            title: 'Products',
-            href: '/products',
+            title: 'Services',
+            href: '/services',
         },
         {
-            title: 'Edit Product',
-            href: '/products/Edit',
+            title: 'Edit Service',
+            href: '/services/Edit',
         },
     ];
 
@@ -96,7 +96,7 @@
 
 <AppLayout {breadcrumbs}>
     <Form  
-        action={route('products.update', product.id)} 
+        action={route('services.update', service.id)} 
         method="put"
     >
         {#snippet children({ errors, processing }: BaseFormSnippetProps)}
@@ -104,13 +104,13 @@
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Edit Product</h1>
+                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Edit Service</h1>
                     <p class="text-sm text-gray-600 mt-1">
-                        Update your inventory product
+                        Update your inventory service
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <Link href="/products">
+                    <Link href="/services">
                         <Button variant="outline" class="gap-2">
                             <ArrowLeft class="h-4 w-4" />
                             Cancel
@@ -122,7 +122,7 @@
                         disabled={processing}
                     >
                         <Save class="h-4 w-4" />
-                        {processing ? 'Saving...' : 'Save Product'}
+                        {processing ? 'Saving...' : 'Save Service'}
                     </Button>
                 </div>
             </div>
@@ -136,26 +136,26 @@
             {/if}
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left Column - Product Details -->
+                <!-- Left Column - Service Details -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Basic Information -->
                     <Card class="shadow-none border">
                         <CardHeader>
                             <CardTitle class="text-lg font-semibold">
-                                Product Information
+                                Service Information
                             </CardTitle>
                             <CardDescription>
-                                Enter basic details about your product
+                                Enter basic details about your service
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <div class="space-y-2">
-                                <Label for="name" class="required">Product Name*</Label>
+                                <Label for="name" class="required">Service Name*</Label>
                                 <Input
                                     id="name"
                                     name="name"
-                                    defaultValue={product.name}
-                                    placeholder="Enter product name"
+                                    defaultValue={service.name}
+                                    placeholder="Enter service name"
                                     class={errors.name ? 'border-red-500' : ''}
                                 />
                                 {#if errors.name}
@@ -181,7 +181,7 @@
                                     id="description"
                                     name="description"
                                     defaultValue={form.description}
-                                    placeholder="Describe your product..."
+                                    placeholder="Describe your service..."
                                     rows={3}
                                 />
                             </div>
@@ -208,7 +208,7 @@
                                         step="0.01"
                                         min="0"
                                         placeholder="0.00"
-                                        defaultValue={product.price}
+                                        defaultValue={service.price}
                                         bind:value={form.price}
                                         class={errors.price ? 'border-red-500' : ''}
                                     />
@@ -296,14 +296,14 @@
 
                 <!-- Right Column - Image & Status -->
                 <div class="space-y-6">
-                    <!-- Product Image -->
+                    <!-- Service Image -->
                     <!-- <Card class="shadow-none border">
                         <CardHeader>
                             <CardTitle class="text-lg font-semibold">
-                                Product Image
+                                Service Image
                             </CardTitle>
                             <CardDescription>
-                                Upload a product image
+                                Upload a service image
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-4">
@@ -311,7 +311,7 @@
                                 <div class="relative">
                                     <img 
                                         src={imagePreview} 
-                                        alt="Product preview" 
+                                        alt="Service preview" 
                                         class="w-full h-48 object-cover rounded-lg"
                                     />
                                     <Button
@@ -355,11 +355,11 @@
                         </CardContent>
                     </Card> -->
 
-                    <!-- Product Status -->
+                    <!-- Service Status -->
                     <Card class="shadow-none border">
                         <CardHeader>
                             <CardTitle class="text-lg font-semibold">
-                                Product Status
+                                Service Status
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -405,10 +405,10 @@
                                     disabled={processing}
                                 >
                                     <Save class="h-4 w-4" />
-                                    {processing ? 'Saving Product...' : 'Save Product'}
+                                    {processing ? 'Saving Service...' : 'Save Service'}
                                 </Button>
                                 
-                                <Link href="/products" class="block">
+                                <Link href="/services" class="block">
                                     <Button variant="outline" class="w-full gap-2">
                                         <ArrowLeft class="h-4 w-4" />
                                         Cancel & Return

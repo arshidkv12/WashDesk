@@ -40,7 +40,7 @@ export interface InvoiceStatusOption {
 export interface InvoiceItem {
     id: string;                     
     
-    product_id?: number | null;     
+    service_id?: number | null;     
     name?: string | null;           
 
     quantity: number;                

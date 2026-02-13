@@ -482,7 +482,7 @@
         </div>
         
         <div>
-          <h3 class="font-semibold mb-4">Product</h3>
+          <h3 class="font-semibold mb-4">Service</h3>
           <ul class="space-y-2 text-gray-400">
             <li><a href="#features" class="hover:text-white">Features</a></li>
             <li><a href="#how-it-works" class="hover:text-white">How It Works</a></li>

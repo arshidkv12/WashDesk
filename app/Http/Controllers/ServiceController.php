@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ProductController extends Controller
+class ServiceController extends Controller
 {
     
     public function index(Request $request)
     {
-        $query = Product::query();
+        $query = Service::query();
 
         if ($request->has('search') && $request->search) {
             $query->where(function ($q) use ($request) {
@@ -54,12 +54,12 @@ class ProductController extends Controller
 
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
 
-        $products = $query
+        $services = $query
             ->orderBy($sortBy, $sortDir)
             ->paginate(25);
 
-        return Inertia::render('Products/Index', [
-            'products' => $products,
+        return Inertia::render('Services/Index', [
+            'services' => $services,
             'filters' => $request->only(['search', 'date_from', 'date_to', 'status']),
             'statusOptions' => $statusOptions,
             'sort_by' => $sortBy, 
@@ -69,7 +69,7 @@ class ProductController extends Controller
 
 
     public function create(Request $request){
-        return Inertia::render('Products/Create');
+        return Inertia::render('Services/Create');
     }
 
 
@@ -80,7 +80,7 @@ class ProductController extends Controller
             'sku'         => 'nullable|string',
             'description' => 'nullable|string',
             'image'       => 'nullable|string',
-            'barcode'     => 'nullable|string|unique:products,barcode',
+            'barcode'     => 'nullable|string|unique:services,barcode',
             'price'       => 'required|numeric|min:0',
             'tax'         => 'nullable|numeric|min:0',
             'quantity'    => 'nullable|required|integer|min:0',
@@ -90,43 +90,43 @@ class ProductController extends Controller
             'status.boolean' => 'Please select status',
         ]);
 
-        Product::create($data);
+        Service::create($data);
 
         Inertia::flash([
-            'message' => 'Product created successfully',
+            'message' => 'Service created successfully',
             'type' => 'success'
         ]);
 
         return redirect()
-            ->route('products.index');
+            ->route('services.index');
     }
 
 
-    public function show(Product $product)
+    public function show(Service $service)
     {
-        return Inertia::render('Products/Show', 
-            ['product' => $product]
+        return Inertia::render('Services/Show', 
+            ['service' => $service]
         );
     }
 
     /**
      * Edit job card
      */
-    public function edit(Product $product)
+    public function edit(Service $service)
     {
-        return Inertia::render('Products/Edit', [
-            'product' => $product,
+        return Inertia::render('Services/Edit', [
+            'service' => $service,
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Service $service)
     {
         $validated = $request->validate([
             'name'        => 'sometimes|string|max:255',
             'sku'         => 'nullable|string',
             'description' => 'nullable|string',
             'image'       => 'nullable|string',
-            'barcode'     => 'nullable|string|unique:products,barcode,' . $product->id,
+            'barcode'     => 'nullable|string|unique:services,barcode,' . $service->id,
             'price'       => 'sometimes|numeric|min:0',
             'tax'         => 'nullable|numeric|min:0',
             'quantity'    => 'sometimes|integer|min:0',
@@ -135,28 +135,28 @@ class ProductController extends Controller
             'status.boolean' => 'Please select status',
         ]);
 
-        $product->update($validated);
+        $service->update($validated);
 
         Inertia::flash([
-            'message' => 'Product updated successfully',
+            'message' => 'Service updated successfully',
             'type' => 'success'
         ]);
 
         return redirect()
-            ->route('products.show', $product);
+            ->route('services.show', $service);
     }
 
-    public function destroy(Product $product)
+    public function destroy(Service $service)
     {
-        $product->delete();
+        $service->delete();
 
         Inertia::flash([
-            'message' => 'Product deleted successfully',
+            'message' => 'Service deleted successfully',
             'type' => 'success'
         ]);
 
         return redirect()
-            ->route('products.index');
+            ->route('services.index');
     }
 
     /**
@@ -166,7 +166,7 @@ class ProductController extends Controller
     {
         $q = $request->get('q');
 
-        return Product::query()
+        return Service::query()
             ->select('id', 'name', 'sku', 'price', 'quantity', 'tax')
             ->when($q, fn ($query) =>
                 $query->where('name', 'like', "%{$q}%")

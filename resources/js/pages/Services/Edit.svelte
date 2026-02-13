@@ -11,6 +11,12 @@
     import { Form, Link, router } from '@inertiajs/svelte';
     import SingleSelect from '@/components/general/SingleSelect.svelte';
     import { type BaseFormSnippetProps } from '@/types/forms';
+    import { onMount } from 'svelte';
+
+    let imagePreview = $state('');
+    let fileInput: HTMLInputElement;
+
+    let { service } = $props();
 
     let form = $state({
         name: '',
@@ -23,8 +29,10 @@
         status: '1',
     });
 
-    let imagePreview = $state('');
-    let fileInput: HTMLInputElement;
+    onMount(()=>{
+        form = service;
+        form.status = service.status ? '1' : '0';
+    });
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -36,8 +44,8 @@
             href: '/services',
         },
         {
-            title: 'Create Service',
-            href: '/services/create',
+            title: 'Edit Service',
+            href: '/services/Edit',
         },
     ];
 
@@ -87,28 +95,30 @@
 </script>
 
 <AppLayout {breadcrumbs}>
-    <Form  action={route('services.store')} method="post">
+    <Form  
+        action={route('services.update', service.id)} 
+        method="put"
+    >
         {#snippet children({ errors, processing }: BaseFormSnippetProps)}
         <div class="space-y-6 p-4 md:p-6">
-            
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Create Service</h1>
+                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Edit Service</h1>
                     <p class="text-sm text-gray-600 mt-1">
-                        Add a new service to your inventory
+                        Update your inventory service
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
                     <Link href="/services">
-                        <Button variant="outline" class="gap-2 cursor-pointer">
+                        <Button variant="outline" class="gap-2">
                             <ArrowLeft class="h-4 w-4" />
                             Cancel
                         </Button>
                     </Link>
                     <Button 
                         type="submit"
-                        class="gap-2 bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                        class="gap-2 bg-blue-600 hover:bg-blue-700"
                         disabled={processing}
                     >
                         <Save class="h-4 w-4" />
@@ -144,23 +154,12 @@
                                 <Input
                                     id="name"
                                     name="name"
+                                    defaultValue={service.name}
                                     placeholder="Enter service name"
                                     class={errors.name ? 'border-red-500' : ''}
                                 />
                                 {#if errors.name}
                                     <p class="text-sm text-red-600">{errors.name}</p>
-                                {/if}
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="name" class="required">SKU</Label>
-                                <Input
-                                    id="sku"
-                                    name="sku"
-                                    placeholder="Enter SKU"
-                                    class={errors.sku ? 'border-red-500' : ''}
-                                />
-                                {#if errors.sku}
-                                    <p class="text-sm text-red-600">{errors.sku}</p>
                                 {/if}
                             </div>
 
@@ -169,7 +168,7 @@
                                 <Textarea
                                     id="description"
                                     name="description"
-                                    bind:value={form.description}
+                                    defaultValue={form.description}
                                     placeholder="Describe your service..."
                                     rows={3}
                                 />
@@ -197,6 +196,7 @@
                                         step="0.01"
                                         min="0"
                                         placeholder="0.00"
+                                        defaultValue={service.price}
                                         bind:value={form.price}
                                         class={errors.price ? 'border-red-500' : ''}
                                     />
@@ -389,7 +389,7 @@
                             <CardContent class="space-y-3">
                                 <Button 
                                     type="submit"
-                                    class="w-full gap-2 bg-blue-600 cursor-pointer hover:bg-blue-700"
+                                    class="w-full gap-2 bg-blue-600 hover:bg-blue-700"
                                     disabled={processing}
                                 >
                                     <Save class="h-4 w-4" />
@@ -397,7 +397,7 @@
                                 </Button>
                                 
                                 <Link href="/services" class="block">
-                                    <Button variant="outline" class="w-full gap-2 cursor-pointer">
+                                    <Button variant="outline" class="w-full gap-2">
                                         <ArrowLeft class="h-4 w-4" />
                                         Cancel & Return
                                     </Button>

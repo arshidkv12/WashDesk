@@ -19,14 +19,9 @@
             href: '/customers',
             icon: UsersIcon,
         },
-        // {
-        //     title: 'Job Cards',
-        //     href: '/job-cards',
-        //     icon: Clipboard,
-        // },
         {
-            title: 'Products',
-            href: '/products',
+            title: 'Services',
+            href: '/services',
             icon: Package,
         },
         {

@@ -151,18 +151,6 @@
                                     <p class="text-sm text-red-600">{errors.name}</p>
                                 {/if}
                             </div>
-                            <div class="space-y-2">
-                                <Label for="name" class="required">SKU</Label>
-                                <Input
-                                    id="sku"
-                                    name="sku"
-                                    placeholder="Enter SKU"
-                                    class={errors.sku ? 'border-red-500' : ''}
-                                />
-                                {#if errors.sku}
-                                    <p class="text-sm text-red-600">{errors.sku}</p>
-                                {/if}
-                            </div>
 
                             <div class="space-y-2">
                                 <Label for="description">Description</Label>

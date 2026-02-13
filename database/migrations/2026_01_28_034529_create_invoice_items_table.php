@@ -17,7 +17,7 @@ return new class extends Migration
             
             $table->enum('item_type', ['product', 'custom_product', 'service']);
             
-            $table->foreignId('product_id')->nullable()->constrained()->onDelete('set null'); 
+            $table->foreignId('service_id')->nullable()->constrained()->onDelete('set null'); 
 
             $table->string('name')->nullable();
                         

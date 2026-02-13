@@ -14,7 +14,7 @@
     import { Form } from '@inertiajs/svelte';
     import { type BaseFormSnippetProps } from '@/types/forms';
     import ProductSelect from '@/components/general/ProductSelect.svelte';
-    import { type Product } from '@/types/products';
+    import { type Service } from '@/types/services';
     import _, { uniqueId } from 'lodash';
     import { onMount } from 'svelte';
     import { type InvoiceItem } from '@/types/invoices';
@@ -107,8 +107,8 @@
                         </Button>
                     </CardHeader>
                     <CardContent>
-                        <ProductSelect onSelect={(product:Product)=>{
-                            const existingIndex = items.findIndex(item => item.id === String(product.id));
+                        <ProductSelect onSelect={(service:Service)=>{
+                            const existingIndex = items.findIndex(item => item.id === String(service.id));
                             if (existingIndex >= 0) {
                                 items[existingIndex].quantity += 1;
                                 items[existingIndex].line_total = calculateTotal(
@@ -118,12 +118,12 @@
                                 );
                             } else {
                                 items = [...items, { 
-                                    id: String(product.id), 
-                                    name: product.name, 
+                                    id: String(service.id), 
+                                    name: service.name, 
                                     quantity: 1, 
-                                    unit_price: product.price, 
-                                    tax_rate: product.tax, 
-                                    line_total: calculateTotal(1, product.price, product.tax)
+                                    unit_price: service.price, 
+                                    tax_rate: service.tax, 
+                                    line_total: calculateTotal(1, service.price, service.tax)
                                 }];
                             }
                         }} />
@@ -184,7 +184,7 @@
                                             item.line_total = updateItemTotal(item.quantity, item.unit_price, item.tax_rate);
                                         }}
                                     />
-                                    <input type="hidden" name={`items[${item.id}].item_type`}  value="product"/>
+                                    <input type="hidden" name={`items[${item.id}].item_type`}  value="service"/>
                                 </TableCell>
                                 <TableCell class="font-medium">
                                 {Number(item.line_total).toFixed(2)}
