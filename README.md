@@ -8,7 +8,6 @@
 
 A modern, lightweight laundry management system built with Laravel, Inertia.js, and Svelte. Perfect for small to medium-sized laundry businesses seeking a reactive, seamless single-page application experience without the complexity of a full SPA setup.
 
-![WashDesk Dashboard Preview](https://via.placeholder.com/1200x630?text=LaundryFlow+Dashboard+Preview)
 
 ## ✨ Features
 
