@@ -148,13 +148,15 @@
             oninput={onSearchInput}
             class="pr-10"
             autocomplete="off"
-            onkeydown={(e) => {
+        />
+
+        <!-- 
+        onkeydown={(e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     searchservices(true);
                 }}
-            }
-        />
+        } -->
         
         <!-- Clear button -->
         {#if searchQuery}

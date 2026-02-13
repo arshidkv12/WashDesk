@@ -11,16 +11,29 @@
     import { format } from 'date-fns';
     import CustomerSelect from '@/components/customer/CustomerSelect.svelte';
     import InputError from '@/components/InputError.svelte';
-    import { Form } from '@inertiajs/svelte';
+    import { Form, page } from '@inertiajs/svelte';
     import { type BaseFormSnippetProps } from '@/types/forms';
     import ServiceSelect from '@/components/general/ServiceSelect.svelte';
     import _, { uniqueId } from 'lodash';
     import { onMount } from 'svelte';
     import { type InvoiceItem } from '@/types/invoices';
     import { type Service } from '@/types/services';
-    
-    let { customers, csrf_token, initCustomerId } = $props();
+    import { type User as UserType } from '@/types';
+    import {  type InvoiceStatusOption } from '@/types/invoices';
+    import { type Customer } from '@/types/customers';
+    import { Link } from '@/components/ui/breadcrumb';
+    import CreateCustomerModal from '@/components/customer/CreateCustomerModal.svelte';
+
+
+    let { customers, csrf_token, invoiceStatusOptions, initCustomerId } = $props() as {
+        customers: Customer[];
+        csrf_token: string;
+        invoiceStatusOptions: InvoiceStatusOption[],
+        initCustomerId: number
+    };    
+
     let customer_id = $state(0);
+    let customerDialogOpen = $state(false);
 
     const breadcrumbs = [
         { title: 'Dashboard', href: '/dashboard' },
@@ -30,11 +43,11 @@
 
     let invoice = $state({
         due_date: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-        status: 'draft',
+        status: 'paid',
         notes: ''
     });
 
-    let status = $state('draft');
+    let status = $state('paid');
 
     let items = $state<InvoiceItem[]>([]);
 
@@ -54,9 +67,15 @@
         items = items.filter(i => i.id !== '0');
         customer_id = initCustomerId;
     });
+    
+    const user = $page.props.auth.user as UserType;
 </script>
 
 <AppLayout {breadcrumbs}>
+    <CreateCustomerModal
+        pageUrl='/invoices/create'
+        bind:open={customerDialogOpen}
+    />
     <div class="container mx-auto p-4">
         <Form
             method="post" 
@@ -82,12 +101,22 @@
                         </CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <Label class="text-sm font-medium">Select Customer *</Label>
-                                <CustomerSelect initCustomers={customers}  bind:modelValue={customer_id} />
-                                <InputError class="mt-1" message={errors.customer_id} />
-                            </div>
+                        <div class="space-y-2">
+                            <Label class="text-sm font-medium">Select Customer *</Label>
+                            <CustomerSelect initCustomers={customers}  bind:modelValue={customer_id} />
+                            <InputError class="mt-1" message={errors.customer_id} />
+                        </div>
+                        <!-- Quick Add Customer Button -->
+                        <div class="pt-2">
+                            <Link onclick={(e)=> {e.preventDefault();customerDialogOpen=true}}>
+                            <Button 
+                                variant="outline"
+                                class="w-full gap-2 cursor-pointer"
+                            >
+                                <Plus class="h-4 w-4" />
+                                Add New Customer
+                            </Button>
+                            </Link>
                         </div>
                     </CardContent>
                     </Card>
@@ -235,13 +264,14 @@
                     <CardContent>
                         <Select.Root type="single" bind:value={status} name="status">
                             <Select.Trigger class="w-full">
-                               {status ? status : "Select status"}
+                                {invoiceStatusOptions.find((s: InvoiceStatusOption) => s.value === status)?.label 
+                                || 'Select Status'
+                                }
                             </Select.Trigger>
-                            <Select.Content>
-                                <Select.Item value="draft">Draft</Select.Item>
-                                <Select.Item value="sent">Sent</Select.Item>
-                                <Select.Item value="paid">Paid</Select.Item>
-                                <Select.Item value="cancelled">Cancelled</Select.Item>
+                             <Select.Content>
+                                {#each invoiceStatusOptions as option}
+                                    <Select.Item value={option.value}>{option.label}</Select.Item>
+                                {/each}
                             </Select.Content>
                             </Select.Root>
                     </CardContent>
@@ -257,19 +287,19 @@
                         <div class="flex justify-between">
                             <span class="text-gray-600">Subtotal</span>
                             <span class="font-medium">
-                            {Number(items.reduce((sum, item) => sum + (item.unit_price * item.quantity ), 0)).toFixed(2)}
+                            {user.currency_symbol}{Number(items.reduce((sum, item) => sum + (item.unit_price * item.quantity ), 0)).toFixed(2)}
                             </span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">GST</span>
                             <span class="font-medium">
-                            {Number(items.reduce((sum, item) => sum + (item.tax_rate/100 * item.unit_price * item.quantity ), 0)).toFixed(2)}
+                            {user.currency_symbol}{Number(items.reduce((sum, item) => sum + (item.tax_rate/100 * item.unit_price * item.quantity ), 0)).toFixed(2)}
                             </span>
                         </div>
                         <div class="flex justify-between pt-2 border-t">
                             <span class="text-lg font-semibold">Total</span>
                             <span class="text-lg font-bold">
-                            {Number(items.reduce((sum, item) => sum + item.line_total, 0)).toFixed(2)}
+                            {user.currency_symbol}{Number(items.reduce((sum, item) => sum + item.line_total, 0)).toFixed(2)}
                             </span>
                         </div>
                         </div>
