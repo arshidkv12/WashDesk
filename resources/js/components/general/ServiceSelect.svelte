@@ -10,12 +10,14 @@
         onSelect: (service: Service) => void;
     }>();
 
-    let placeholder = "Search service by name or barcode...";
+    let placeholder = "Search the service...";
     let showResults = $state(false);
     let loading = $state(false);
     let searchQuery = $state("");
     let services = $state<Service[]>([]);
     let containerRef: HTMLDivElement | null = $state(null);
+    let highlightedIndex = $state<number>(0);
+        
 
     async function searchservices(enterPress = false) {
         if (!searchQuery.trim()) {
@@ -61,6 +63,7 @@
         
         clearTimeout(timeout);
         timeout = setTimeout(() => {
+            highlightedIndex = 0;
             searchservices();
         }, 300);
     }
@@ -70,27 +73,58 @@
         searchQuery = ""; 
         services = [];
         showResults = false;
+        highlightedIndex = 0;
     }
 
     function clearSearch() {
         searchQuery = "";
         services = [];
         showResults = false;
+        highlightedIndex = 0;
     }
 
     // Close results when clicking outside
     function handleClickOutside(e: MouseEvent) {
         if (containerRef && !containerRef.contains(e.target as Node)) {
             showResults = false;
+            highlightedIndex = 0;
         }
     }
 
     // Handle keyboard events
     function handleKeyDown(e: KeyboardEvent) {
+        if (!showResults || services.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            highlightedIndex =
+                highlightedIndex < services.length - 1
+                    ? highlightedIndex + 1
+                    : 0;
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlightedIndex =
+                highlightedIndex > 0
+                    ? highlightedIndex - 1
+                    : services.length - 1;
+        }
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightedIndex >= 0) {
+                handleSelectService(services[highlightedIndex]);
+            }
+        }
+
         if (e.key === 'Escape') {
+            e.preventDefault();
             showResults = false;
+            highlightedIndex = 0;
         }
     }
+
 
     onMount(() => {
         document.addEventListener('mousedown', handleClickOutside);
@@ -112,14 +146,14 @@
             placeholder={placeholder}
             bind:value={searchQuery}
             oninput={onSearchInput}
+            class="pr-10"
+            autocomplete="off"
             onkeydown={(e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     searchservices(true);
                 }}
             }
-            class="pr-10"
-            autocomplete="off"
         />
         
         <!-- Clear button -->
@@ -153,13 +187,15 @@
                     </div>
                 {:else if services.length > 0}
                     <div class="py-1">
-                        {#each services as service (service.id)}
+                        {#each services as service, index (service.id)}
                             <button
                                 type="button"
                                 onclick={() => handleSelectService(service)}
                                 class={cn(
-                                    "w-full text-left px-3 py-2 hover:bg-gray-100",
-                                    "flex items-center gap-2 transition-colors"
+                                    "w-full text-left px-3 py-2 flex items-center gap-2 transition-colors",
+                                    index === highlightedIndex
+                                        ? "bg-gray-100"
+                                        : "hover:bg-gray-100"
                                 )}
                             >
                                 <CheckIcon

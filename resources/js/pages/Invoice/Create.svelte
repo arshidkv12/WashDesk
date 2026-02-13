@@ -13,7 +13,7 @@
     import InputError from '@/components/InputError.svelte';
     import { Form } from '@inertiajs/svelte';
     import { type BaseFormSnippetProps } from '@/types/forms';
-    import ProductSelect from '@/components/general/ProductSelect.svelte';
+    import ServiceSelect from '@/components/general/ServiceSelect.svelte';
     import _, { uniqueId } from 'lodash';
     import { onMount } from 'svelte';
     import { type InvoiceItem } from '@/types/invoices';
@@ -107,7 +107,7 @@
                         </Button>
                     </CardHeader>
                     <CardContent>
-                        <ProductSelect onSelect={(service:Service)=>{
+                        <ServiceSelect onSelect={(service:Service)=>{
                             const existingIndex = items.findIndex(item => item.id === String(service.id));
                             if (existingIndex >= 0) {
                                 items[existingIndex].quantity += 1;

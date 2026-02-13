@@ -226,27 +226,23 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <Label for="quantity" class="flex items-center gap-2">
-                                        <Hash class="h-4 w-4" />
-                                        Stock Quantity
+                             <div class="space-y-2">
+                                    <Label for="barcode" class="flex items-center gap-2">
+                                        <Barcode class="h-4 w-4" />
+                                        Barcode
                                     </Label>
-                                    <Input
-                                        id="quantity"
-                                        name="quantity"
-                                        type="number"
-                                        min="0"
-                                        bind:value={form.quantity}
-                                        placeholder="0"
-                                        class={errors.quantity ? 'border-red-500' : ''}
-                                    />
-                                    {#if errors.quantity}
-                                        <p class="text-sm text-red-600">{errors.quantity}</p>
-                                    {/if}
+                                    <div class="flex gap-2">
+                                        <Input
+                                            id="barcode"
+                                            name="barcode"
+                                            bind:value={form.barcode}
+                                            placeholder="Enter Barcode"
+                                        />
+                                        <Button type="button" variant="outline" onclick={generateBarcode}>
+                                            Generate
+                                        </Button>
+                                    </div>
                                 </div>
-
-                            </div>
 
                             <!-- Price Calculation Preview -->
                             <div class="mt-4 p-4 bg-gray-50 rounded-lg">

@@ -116,28 +116,22 @@
                                 {#each services.data as service (service.id)}
                                     <TableRow class="hover:bg-muted/50">
                                         <TableCell class="pl-4">
-                                            <Link>
-                                                <div class="text-muted-foreground">
-                                                    {service.created_at_formatted}
-                                                </div>
-                                            </Link>
+                                            <div class="text-muted-foreground">
+                                                {service.created_at_formatted}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Link>
-                                                <div class="max-w-[320px] whitespace-normal">
-                                                    <p class="font-medium line-clamp-2" title={service.name}>
-                                                        {service.name}
-                                                    </p>
-                                                </div>
-                                            </Link>
+                                            <div class="max-w-[320px] whitespace-normal">
+                                                <p class="font-medium line-clamp-2" title={service.name}>
+                                                    {service.name}
+                                                </p>
+                                            </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Link>
-                                                <div class="font-medium">
-                                                    <span class="md:hidden text-sm">Price: </span>
-                                                    {service.price || '-'}
-                                                </div>
-                                            </Link>
+                                            <div class="font-medium">
+                                                <span class="md:hidden text-sm">Price: </span>
+                                                {service.price || '-'}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <Link>

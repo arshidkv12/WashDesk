@@ -166,18 +166,18 @@ class ServiceController extends Controller
     {
         $q = $request->get('q');
 
-        return Service::query()
+        $k = Service::query()
             ->select('id', 'name', 'sku', 'price', 'quantity', 'tax')
             ->when($q, fn ($query) =>
                 $query->where('name', 'like', "%{$q}%")
-                    ->orWhere('sku', 'like', "%{$q}%")
                     ->orWhere('barcode', '=', $q)
             )
-            ->where('quantity', '>', 0)
             ->where('status', 1)
             ->orderBy('name')
             ->limit(10)
             ->get()
             ->makeHidden(['image_url', 'created_at_formatted']);
+
+            return $k;
     }
 }
