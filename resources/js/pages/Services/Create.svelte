@@ -8,9 +8,10 @@
     import { Alert, AlertDescription } from '@/components/ui/alert';
     import { Save, ArrowLeft, Upload, X, DollarSign, Percent, Hash, Barcode } from 'lucide-svelte';
     import { type BreadcrumbItem } from '@/types';
-    import { Form, Link, router } from '@inertiajs/svelte';
+    import { Form, Link, page, router } from '@inertiajs/svelte';
     import SingleSelect from '@/components/general/SingleSelect.svelte';
     import { type BaseFormSnippetProps } from '@/types/forms';
+    import { type User as UserType } from '@/types';
 
     let form = $state({
         name: '',
@@ -84,6 +85,8 @@
         const random = Math.floor(100000 + Math.random() * 900000);
         form.barcode = `${prefix}${random}`;
     };
+
+    const user = $page.props.auth.user as UserType;
 </script>
 
 <AppLayout {breadcrumbs}>
@@ -210,59 +213,21 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <Label for="quantity" class="flex items-center gap-2">
-                                        <Hash class="h-4 w-4" />
-                                        Stock Quantity
-                                    </Label>
-                                    <Input
-                                        id="quantity"
-                                        name="quantity"
-                                        type="number"
-                                        min="0"
-                                        bind:value={form.quantity}
-                                        placeholder="0"
-                                        class={errors.quantity ? 'border-red-500' : ''}
-                                    />
-                                    {#if errors.quantity}
-                                        <p class="text-sm text-red-600">{errors.quantity}</p>
-                                    {/if}
-                                </div>
-
-                                <div class="space-y-2">
-                                    <Label for="barcode" class="flex items-center gap-2">
-                                        <Barcode class="h-4 w-4" />
-                                        Barcode
-                                    </Label>
-                                    <div class="flex gap-2">
-                                        <Input
-                                            id="barcode"
-                                            name="barcode"
-                                            bind:value={form.barcode}
-                                            placeholder="Enter Barcode"
-                                        />
-                                        <Button type="button" variant="outline" onclick={generateBarcode}>
-                                            Generate
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- Price Calculation Preview -->
                             <div class="mt-4 p-4 bg-gray-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm text-gray-600">Price (excl. tax):</span>
-                                    <span class="font-medium">${parseFloat(form.price) || 0}</span>
+                                    <span class="font-medium">{user.currency_symbol}{parseFloat(form.price) || 0}</span>
                                 </div>
                                 <div class="flex justify-between items-center mt-1">
                                     <span class="text-sm text-gray-600">Tax ({form.tax}%):</span>
-                                    <span class="font-medium">${taxVal}</span>
+                                    <span class="font-medium">{user.currency_symbol}{taxVal}</span>
                                 </div>
                                 <div class="flex justify-between items-center mt-2 pt-2 border-t">
                                     <span class="font-medium">Final Price:</span>
                                     <span class="text-lg font-bold text-blue-600">
-                                        {finalPrice}
+                                        {user.currency_symbol}{finalPrice}
                                     </span>
                                 </div>
                             </div>

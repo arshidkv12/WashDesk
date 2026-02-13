@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('company_name')->nullable()->after('email');
-            $table->string('currency_symbol', 5)->default('$')->after('company_name');
+            $table->string('currency_symbol', 5)->default('₹')->after('company_name');
             $table->string('company_logo')->nullable()->after('company_name');
             $table->text('company_address')->nullable()->after('company_name');
         });

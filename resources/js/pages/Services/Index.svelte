@@ -13,6 +13,7 @@
     import { toast } from 'svelte-sonner';
     import SortIcon from '@/components/general/SortIcon.svelte';
     import { changeSort, getSortIcon } from '@/lib/helper/sortUtils';
+    import { type User as UserType } from '@/types';
 
     let { services, filters, statusOptions, sort_by, sort_dir } = $props();
     // svelte-ignore state_referenced_locally
@@ -40,10 +41,9 @@
         },
     ];
 
-    const exportServices = () => {
-        // Handle export logic
-        console.log('Exporting services...');
-    };
+    const user = $page.props.auth.user as UserType;
+
+
 </script>
 
 <AppLayout {breadcrumbs}>
@@ -106,18 +106,8 @@
                                             <SortIcon direction={getSortIcon('created_at', sort_by, sort_dir)} />
                                         </Button>
                                     </TableHead>
-                                    <TableHead class="min-w-[180px]">Service Name</TableHead>
-                                    <TableHead class="min-w-[100px]">Price</TableHead>
-                                    <TableHead class="text-center min-w-[80px]">
-                                        <Button 
-                                            variant="ghost" 
-                                            class="cursor-pointer"
-                                            onclick={()=>changeSort( filters, 'quantity', sort_dir, 'services.index')}
-                                        >
-                                            Stock
-                                            <SortIcon direction={getSortIcon('quantity', sort_by, sort_dir)} />
-                                        </Button>
-                                    </TableHead>
+                                    <TableHead class="min-w-[320px]">Service Name</TableHead>
+                                    <TableHead class="min-w-[100px]">Price ({user.currency_symbol})</TableHead>
                                     <TableHead class="min-w-[100px]">Status</TableHead>
                                     <TableHead class="w-20 text-center">Actions</TableHead>
                                 </TableRow>
@@ -126,15 +116,15 @@
                                 {#each services.data as service (service.id)}
                                     <TableRow class="hover:bg-muted/50">
                                         <TableCell class="pl-4">
-                                            <Link href={`/services/${service.id}`}>
+                                            <Link>
                                                 <div class="text-muted-foreground">
                                                     {service.created_at_formatted}
                                                 </div>
                                             </Link>
                                         </TableCell>
                                         <TableCell>
-                                            <Link href={`/services/${service.id}`}>
-                                                <div class="max-w-[250px] whitespace-normal">
+                                            <Link>
+                                                <div class="max-w-[320px] whitespace-normal">
                                                     <p class="font-medium line-clamp-2" title={service.name}>
                                                         {service.name}
                                                     </p>
@@ -142,23 +132,15 @@
                                             </Link>
                                         </TableCell>
                                         <TableCell>
-                                            <Link href={`/services/${service.id}`}>
+                                            <Link>
                                                 <div class="font-medium">
                                                     <span class="md:hidden text-sm">Price: </span>
                                                     {service.price || '-'}
                                                 </div>
                                             </Link>
                                         </TableCell>
-                                        <TableCell class="text-center">
-                                            <Link href={`/services/${service.id}`}>
-                                                <div>
-                                                    <span class="md:hidden text-sm">Stock: </span>
-                                                    {service.quantity}
-                                                </div>
-                                            </Link>
-                                        </TableCell>
                                         <TableCell>
-                                            <Link href={`/services/${service.id}`}>
+                                            <Link>
                                                 {service.status ? 'Active' : 'Inactive'}
                                             </Link>
                                         </TableCell>
@@ -170,7 +152,7 @@
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <Link href={`/services/${service.id}`}>
+                                                    <Link>
                                                         <DropdownMenuItem>
                                                             <Eye class="mr-2 h-4 w-4" />
                                                             View

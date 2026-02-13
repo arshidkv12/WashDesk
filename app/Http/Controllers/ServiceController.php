@@ -83,7 +83,7 @@ class ServiceController extends Controller
             'barcode'     => 'nullable|string|unique:services,barcode',
             'price'       => 'required|numeric|min:0',
             'tax'         => 'nullable|numeric|min:0',
-            'quantity'    => 'nullable|required|integer|min:0',
+            'quantity'    => 'nullable|integer|min:0',
             'status'      => 'boolean',
         ],
         [
@@ -143,7 +143,7 @@ class ServiceController extends Controller
         ]);
 
         return redirect()
-            ->route('services.show', $service);
+            ->route('services.index');
     }
 
     public function destroy(Service $service)
