@@ -15,39 +15,23 @@ A modern, lightweight laundry management system built with Laravel, Inertia.js, 
 - Create and track laundry orders with unique order IDs
 - Real-time order status updates (Pending, Processing, Ready, Delivered, Collected)
 - Service type management (Wash, Dry Clean, Iron, Fold, Stain Removal)
-- Weight-based and item-based pricing models
-- Express service upcharge options
 
 ### 💰 Billing & Payments
 - Automatic invoice generation with PDF export
 - Configurable tax rates (GST/VAT/Sales Tax)
 - Multiple payment methods (Cash, Card, Mobile Money, Bank Transfer)
-- Partial payment support
-- Discount codes and loyalty discounts
-- Digital receipt delivery via SMS/Email
 
 ### 👥 Customer Management
 - Comprehensive customer profiles with contact details
 - Complete order history and preferences
-- Loyalty points system with automated rewards
 - Customer notes and special instructions
-- Birthday/anniversary promotions
-- Customer communication log
 
 ### 📈 Reports & Analytics
 - Interactive revenue charts and graphs
 - Daily/weekly/monthly/yearly performance reports
-- Service popularity analytics
-- Customer retention and churn metrics
 - Peak hour/service analysis
 - Export reports to PDF/CSV
 
-### 🔧 Admin Dashboard
-- Role-based access control (Admin, Manager, Staff)
-- Activity logging and audit trails
-- Inventory management (detergents, supplies)
-- Staff performance tracking
-- System settings and configurations
 
 ## 🚀 Tech Stack
 
