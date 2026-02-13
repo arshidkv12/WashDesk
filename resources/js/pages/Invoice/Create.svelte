@@ -14,10 +14,10 @@
     import { Form } from '@inertiajs/svelte';
     import { type BaseFormSnippetProps } from '@/types/forms';
     import ProductSelect from '@/components/general/ProductSelect.svelte';
-    import { type Service } from '@/types/services';
     import _, { uniqueId } from 'lodash';
     import { onMount } from 'svelte';
     import { type InvoiceItem } from '@/types/invoices';
+    import { type Service } from '@/types/services';
     
     let { customers, csrf_token, initCustomerId } = $props();
     let customer_id = $state(0);

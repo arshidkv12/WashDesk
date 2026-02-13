@@ -1,34 +1,34 @@
 <script lang="ts">
     import CheckIcon from "@lucide/svelte/icons/check";
     import Input from "../ui/input/input.svelte";
-    import { type Product } from "@/types/products";
+    import { type Service } from "@/types/services";
     import { cn } from "@/lib/utils";
     import { onMount } from "svelte";
     import { XIcon } from "lucide-svelte";
 
     let { onSelect } = $props<{ 
-        onSelect: (product: Product) => void;
+        onSelect: (service: Service) => void;
     }>();
 
-    let placeholder = "Search product by name or barcode...";
+    let placeholder = "Search service by name or barcode...";
     let showResults = $state(false);
     let loading = $state(false);
     let searchQuery = $state("");
-    let products = $state<Product[]>([]);
+    let services = $state<Service[]>([]);
     let containerRef: HTMLDivElement | null = $state(null);
 
-    async function searchproducts(enterPress = false) {
+    async function searchservices(enterPress = false) {
         if (!searchQuery.trim()) {
-            products = [];
+            services = [];
             return;
         }
 
         loading = true;
-        products = [];
+        services = [];
         
         try {
             const res = await fetch(
-                `/products/search?q=${encodeURIComponent(searchQuery)}`,
+                `/services/search?q=${encodeURIComponent(searchQuery)}`,
                 {
                     headers: {
                         'Accept': 'application/json',
@@ -40,9 +40,9 @@
 
             if (res.ok) {
                 const data = await res.json();
-                products = Array.isArray(data) ? data : [];
-                if(enterPress && products.length > 0){
-                    handleSelectProduct(products[0]);
+                services = Array.isArray(data) ? data : [];
+                if(enterPress && services.length > 0){
+                    handleSelectService(services[0]);
                 }
             }
         } catch (e) {
@@ -61,20 +61,20 @@
         
         clearTimeout(timeout);
         timeout = setTimeout(() => {
-            searchproducts();
+            searchservices();
         }, 300);
     }
 
-    function handleSelectProduct(product: Product) {
-        onSelect(product);
+    function handleSelectService(service: Service) {
+        onSelect(service);
         searchQuery = ""; 
-        products = [];
+        services = [];
         showResults = false;
     }
 
     function clearSearch() {
         searchQuery = "";
-        products = [];
+        services = [];
         showResults = false;
     }
 
@@ -104,7 +104,7 @@
     });
 </script>
 
-<div class="product-search-container relative" bind:this={containerRef}>
+<div class="service-search-container relative" bind:this={containerRef}>
     <!-- Search Input -->
     <div class="relative">
         <Input
@@ -115,7 +115,7 @@
             onkeydown={(e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    searchproducts(true);
+                    searchservices(true);
                 }}
             }
             class="pr-10"
@@ -147,16 +147,16 @@
                     <div class="p-4 text-sm text-gray-500 text-center">
                         Searching...
                     </div>
-                {:else if products.length === 0 && searchQuery.trim()}
+                {:else if services.length === 0 && searchQuery.trim()}
                     <div class="p-4 text-sm text-gray-500 text-center">
-                        No products found for "{searchQuery}"
+                        No services found for "{searchQuery}"
                     </div>
-                {:else if products.length > 0}
+                {:else if services.length > 0}
                     <div class="py-1">
-                        {#each products as product (product.id)}
+                        {#each services as service (service.id)}
                             <button
                                 type="button"
-                                onclick={() => handleSelectProduct(product)}
+                                onclick={() => handleSelectService(service)}
                                 class={cn(
                                     "w-full text-left px-3 py-2 hover:bg-gray-100",
                                     "flex items-center gap-2 transition-colors"
@@ -168,16 +168,16 @@
                                     )}
                                 />
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-medium truncate">{product.name}</div>
+                                    <div class="font-medium truncate">{service.name}</div>
                                     <div class="text-xs text-gray-500 flex flex-col sm:flex-row sm:gap-2">
-                                        {#if product.sku}
-                                            <span>SKU: {product.sku}</span>
+                                        {#if service.sku}
+                                            <span>SKU: {service.sku}</span>
                                         {/if}
-                                        {#if product.price}
-                                            <span>Price: {product.price}</span>
+                                        {#if service.price}
+                                            <span>Price: {service.price}</span>
                                         {/if}
-                                        {#if product.quantity}
-                                            <span>Stock: {product.quantity}</span>
+                                        {#if service.quantity}
+                                            <span>Stock: {service.quantity}</span>
                                         {/if}
                                     </div>
                                 </div>
@@ -186,7 +186,7 @@
                     </div>
                 {:else}
                     <div class="p-4 text-sm text-gray-500 text-center">
-                        Type to search products
+                        Type to search services
                     </div>
                 {/if}
             </div>
