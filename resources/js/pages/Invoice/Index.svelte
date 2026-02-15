@@ -14,6 +14,7 @@
     import SortIcon from '@/components/general/SortIcon.svelte';
     import { changeSort, getSortIcon } from '@/lib/helper/sortUtils';
     import Badge from '@/components/ui/badge/badge.svelte';
+    import { type User as UserType } from '@/types';
 
     let { invoices, filters, statusOptions, sort_by, sort_dir, totalAmount, paidAmount } = $props();
     // svelte-ignore state_referenced_locally
@@ -43,8 +44,11 @@
 
     const exportInvoices = () => {
         // Handle export logic
-        console.log('Exporting invoices...');
+        // console.log('Exporting invoices...');
     };
+    
+    const user = $page.props.auth.user as UserType;
+
 </script>
 
 <AppLayout {breadcrumbs}>
@@ -86,13 +90,13 @@
                         Showing {invoices.from} to {invoices.to} of {invoices.total} invoices
                         <div class="mt-2 flex items-center gap-3">
                             <Badge variant="outline" class="bg-background">
-                                Total: {totalAmount}
+                                Total: {user.currency_symbol}{totalAmount}
                             </Badge>
                             <Badge variant="outline" class="bg-green-50 text-green-700 border-green-200">
-                                Paid: {paidAmount}
+                                Paid: {user.currency_symbol}{paidAmount}
                             </Badge>
                             <Badge variant="outline" class="bg-amber-50 text-amber-700 border-amber-200">
-                                Pending: {totalAmount - paidAmount}
+                                Pending: {user.currency_symbol}{totalAmount - paidAmount}
                             </Badge>
                         </div>
                     </CardDescription>
