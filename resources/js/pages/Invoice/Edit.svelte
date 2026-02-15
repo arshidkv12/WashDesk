@@ -75,6 +75,8 @@
         customer_id = invoice.customer_id;
         notes = invoice.notes ?? '';
         status = invoice.status;
+        paid_amount = invoice.paid_amount;
+        discount_amount = invoice.discount_amount;
     });
 
     const user = $page.props.auth.user as UserType;
@@ -297,12 +299,12 @@
 
                             <div class="space-y-1">
                                 <Label>Discount Amount</Label>
-                                <Input type="number" bind:value={discount_amount} min="0" step="0.01" />
+                                <Input type="number" name="discount_amount" bind:value={discount_amount} min="0" step="0.01" />
                             </div>
 
                             <div class="space-y-1">
                                 <Label>Paid Amount</Label>
-                                <Input type="number" bind:value={paid_amount} min="0" step="0.01" />
+                                <Input type="number" name="paid_amount" bind:value={paid_amount} min="0" step="0.01" />
                             </div>
 
                             <div class="flex justify-between pt-2 border-t">

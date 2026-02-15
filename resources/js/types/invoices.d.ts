@@ -8,6 +8,8 @@ export interface Invoice {
     tax_amount: number;                
     discount_amount: number;          
     total_amount: number;             
+    subtotal: number;             
+    paid_amount: number;             
 
     status: 'draft' | string;         
 

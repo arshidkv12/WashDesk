@@ -63,6 +63,28 @@
         return subtotal + tax_amount;
     }
 
+    let discount_amount = $state(0);
+    let paid_amount = $state(0);
+
+    const subtotal = $derived(
+        items.reduce(
+            (sum, item) => sum + item.unit_price * item.quantity,
+            0
+        )
+    );
+
+    const totalGst = $derived(
+        items.reduce(
+            (sum, item) =>
+                sum + (item.tax_rate / 100) * item.unit_price * item.quantity,
+            0
+        )
+    );
+
+    const total_before_discount = $derived(subtotal + totalGst);
+    const total = $derived(Math.max(total_before_discount - discount_amount, 0));
+    const balance_due = $derived(total - paid_amount);
+
     onMount(()=>{
         items = items.filter(i => i.id !== '0');
         customer_id = initCustomerId;
@@ -184,9 +206,6 @@
                                     type="number"
                                     min="1"
                                     bind:value={item.quantity}
-                                    oninput={(e) => {
-                                        item.line_total = updateItemTotal(item.quantity, item.unit_price, item.tax_rate);
-                                    }}
                                     class={errors?.[`items.${item.id}.quantity`] ? 'border-red-500 focus:border-red-500' : ''}
                                 />
                                 </TableCell>
@@ -197,9 +216,6 @@
                                     min="0"
                                     step="0.01"
                                     bind:value={item.unit_price}
-                                    oninput={(e) => {
-                                        item.line_total = updateItemTotal(item.quantity, item.unit_price, item.tax_rate);
-                                    }}
                                     class={errors?.[`items.${item.id}.unit_price`] ? 'border-red-500 focus:border-red-500' : ''}
                                 />
                                 </TableCell>
@@ -209,9 +225,6 @@
                                         type="number"
                                         min="0"
                                         bind:value={item.tax_rate}
-                                        oninput={(e) => {
-                                            item.line_total = updateItemTotal(item.quantity, item.unit_price, item.tax_rate);
-                                        }}
                                     />
                                     <input type="hidden" name={`items[${item.id}].item_type`}  value="service"/>
                                 </TableCell>
@@ -279,31 +292,56 @@
 
                     <!-- Summary Card -->
                     <Card>
-                    <CardHeader>
-                        <CardTitle>Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent class="space-y-4">
-                        <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Subtotal</span>
-                            <span class="font-medium">
-                            {user.currency_symbol}{Number(items.reduce((sum, item) => sum + (item.unit_price * item.quantity ), 0)).toFixed(2)}
-                            </span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">GST</span>
-                            <span class="font-medium">
-                            {user.currency_symbol}{Number(items.reduce((sum, item) => sum + (item.tax_rate/100 * item.unit_price * item.quantity ), 0)).toFixed(2)}
-                            </span>
-                        </div>
-                        <div class="flex justify-between pt-2 border-t">
-                            <span class="text-lg font-semibold">Total</span>
-                            <span class="text-lg font-bold">
-                            {user.currency_symbol}{Number(items.reduce((sum, item) => sum + item.line_total, 0)).toFixed(2)}
-                            </span>
-                        </div>
-                        </div>
-                    </CardContent>
+                        <CardHeader>
+                            <CardTitle>Summary</CardTitle>
+                        </CardHeader>
+
+                        <CardContent class="space-y-4">
+
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Subtotal</span>
+                                <span class="font-medium">
+                                    {user.currency_symbol}{subtotal.toFixed(2)}
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">GST</span>
+                                <span class="font-medium">
+                                    {user.currency_symbol}{totalGst.toFixed(2)}
+                                </span>
+                            </div>
+
+                            <div class="space-y-1">
+                                <Label>Discount Amount</Label>
+                                <Input type="number" name='discount_amount' bind:value={discount_amount} min="0" step="0.01" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <Label>Paid Amount</Label>
+                                <Input type="number" name='paid_amount' bind:value={paid_amount} min="0" step="0.01" />
+                            </div>
+
+                            <div class="flex justify-between pt-2 border-t">
+                                <span class="text-lg font-semibold">Total</span>
+                                <span class="text-lg font-bold">
+                                    {user.currency_symbol}{total.toFixed(2)}
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between">
+                               {#if balance_due > 0}
+                                    <span>Balance Due</span>
+                                    <span>₹{Math.abs(balance_due).toFixed(2)}</span>
+                                {:else if balance_due === 0}
+                                    <span>Paid in Full</span>
+                                    <span>₹0.00</span>
+                                {:else}
+                                    <span>Change to Return</span>
+                                    <span>₹{Math.abs(balance_due).toFixed(2)}</span>
+                                {/if}
+                            </div>
+                        </CardContent>
                     </Card>
 
                     <!-- Actions Card -->

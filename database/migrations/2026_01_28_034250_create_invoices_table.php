@@ -26,6 +26,7 @@ return new class extends Migration
             $table->decimal('tax_amount', 15, 2)->default(0);
             $table->decimal('discount_amount', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
+            $table->decimal('paid_amount', 15, 2)->default(0);
             
             // Status
             $table->string('status', 50)->default('draft');

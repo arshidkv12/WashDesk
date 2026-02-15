@@ -122,7 +122,7 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'customer_id'       => 'required|exists:customers,id',
             'discount_amount'   => 'nullable|numeric|min:0',
-            'amount_paid'       => 'nullable|numeric|min:0',
+            'paid_amount'       => 'nullable|numeric|min:0',
             'status'            => 'required|string',
             'job_card_id'       => 'nullable|exists:job_cards,id',
             'notes'             => 'nullable|string',
@@ -156,14 +156,14 @@ class InvoiceController extends Controller
 
         $discountAmount = $validated['discount_amount'] ?? 0;
         $totalAmount    = $subtotal + $taxAmount - $discountAmount;
-        $amountPaid     = $validated['amount_paid'] ?? 0;
+        $paidAmount     = $validated['paid_amount'] ?? 0;
         
         
         $invoice = Invoice::create(array_merge($validated, [
             'subtotal'      => $subtotal,
             'tax_amount'    => $taxAmount,
             'total_amount'  => $totalAmount,
-            // 'amount_paid'   => $amountPaid,
+            'paid_amount'   => $paidAmount,
         ]));
 
         foreach ($validatedItems['items'] as $item) {
@@ -237,7 +237,7 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'customer_id'       => 'required|exists:customers,id',
             'discount_amount'   => 'nullable|numeric|min:0',
-            'amount_paid'       => 'nullable|numeric|min:0',
+            'paid_amount'       => 'nullable|numeric|min:0',
             'status'            => 'required|string',
             'job_card_id'       => 'nullable|exists:job_cards,id',
             'notes'             => 'nullable|string',
@@ -271,13 +271,14 @@ class InvoiceController extends Controller
 
         $discountAmount = $validated['discount_amount'] ?? 0;
         $totalAmount    = $subtotal + $taxAmount - $discountAmount;
-        $amountPaid     = $validated['amount_paid'] ?? 0;
+        $paidAmount     = $validated['paid_amount'] ?? 0;
 
         $invoice->update(array_merge($validated, [
             'subtotal'      => $subtotal,
             'tax_amount'    => $taxAmount,
             'total_amount'  => $totalAmount,
-            // 'amount_paid'   => $amountPaid,
+            'discount_amount'  => $discountAmount,
+            'paid_amount'   => $paidAmount,
         ]));
 
         $invoice->items()->delete();

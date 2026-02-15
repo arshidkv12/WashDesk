@@ -18,7 +18,7 @@ class Invoice extends Model
         'tax_amount',
         'discount_amount',
         'total_amount',
-        'amount_paid',
+        'paid_amount',
         'status',
         'job_card_id',
         'notes',
@@ -29,7 +29,7 @@ class Invoice extends Model
         'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
-        'amount_paid' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
     ];
 
 

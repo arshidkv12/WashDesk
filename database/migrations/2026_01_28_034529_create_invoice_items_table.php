@@ -37,7 +37,7 @@ return new class extends Migration
             $table->timestamps();
             
             $table->index('invoice_id');
-            $table->index('product_id');
+            $table->index('service_id');
             $table->index('item_type');
         });
     }
