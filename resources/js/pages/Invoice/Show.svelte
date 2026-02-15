@@ -45,7 +45,8 @@
 
     const subtotal = $derived(invoiceItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0));
     const taxTotal = $derived(invoiceItems.reduce((sum, item) => sum + ((item.quantity * item.unit_price) * (item.tax_rate / 100)), 0));
-    const total = $derived(subtotal + taxTotal);
+    const total_before_discount = $derived(subtotal + taxTotal);
+    const total = $derived(Math.max(total_before_discount - invoice.discount_amount, 0));
 
     $effect(() => {   
         const flash = $page.flash as Flash;
@@ -153,6 +154,14 @@
                                             {user.currency_symbol}{taxTotal}
                                         </TableCell>
                                     </TableRow>
+                                    {#if invoice.discount_amount > 0}
+                                    <TableRow class="bg-gray-50">
+                                        <TableCell colspan={3} class="text-right font-semibold">Discount</TableCell>
+                                        <TableCell colspan={2} class="text-right font-semibold">
+                                            {user.currency_symbol}{invoice.discount_amount}
+                                        </TableCell>
+                                    </TableRow>
+                                    {/if}
                                     <TableRow class="bg-gray-100 border-t-2">
                                         <TableCell colspan={3} class="text-right text-lg font-bold">Total</TableCell>
                                         <TableCell colspan={2} class="text-right text-lg font-bold text-primary">
