@@ -15,10 +15,13 @@
     import { changeSort, getSortIcon } from '@/lib/helper/sortUtils';
     import Badge from '@/components/ui/badge/badge.svelte';
     import { type User as UserType } from '@/types';
+    import { type InvoiceStatusOption } from '@/types/invoices';
 
     let { invoices, filters, statusOptions, sort_by, sort_dir, totalAmount, paidAmount } = $props();
     // svelte-ignore state_referenced_locally
     let localFilters = $state<Filters>({ ...filters });
+
+    let pending_amount = $derived(Math.abs(totalAmount - paidAmount).toFixed(2));
 
     $effect(() => {   
         const flash = $page.flash as Flash;
@@ -96,7 +99,7 @@
                                 Paid: {user.currency_symbol}{paidAmount}
                             </Badge>
                             <Badge variant="outline" class="bg-amber-50 text-amber-700 border-amber-200">
-                                Pending: {user.currency_symbol}{totalAmount - paidAmount}
+                                Pending: {user.currency_symbol}{pending_amount}
                             </Badge>
                         </div>
                     </CardDescription>
@@ -115,8 +118,9 @@
                                     <TableHead class="pl-4 min-w-[60px]">Invoice No</TableHead>
                                     <TableHead class="pl-4 min-w-[120px]">Created</TableHead>
                                     <TableHead class="min-w-[180px]">Customer</TableHead>
-                                    <TableHead class="min-w-[100px]">Total Amount</TableHead>
-                                    <TableHead class="min-w-[100px]">Paid</TableHead>
+                                    <TableHead class="min-w-[100px]">Total ({user.currency_symbol})</TableHead>
+                                    <TableHead class="min-w-[100px]">Paid ({user.currency_symbol})</TableHead>
+                                    <TableHead class="min-w-[100px]">Status</TableHead>
                                     <TableHead class="w-20 text-center">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -164,8 +168,13 @@
                                         <TableCell>
                                             <Link href={`/invoices/${invoice.id}`}>
                                                 <div class="font-medium">
-                                                    {invoice.paid || '-'}
+                                                    {invoice.paid_amount || '-'}
                                                 </div>
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Link href={`/invoices/${invoice.id}`}>
+                                            {statusOptions.find((s: InvoiceStatusOption) => s.value === invoice.status)?.label}
                                             </Link>
                                         </TableCell>
                                         <TableCell class="text-center">

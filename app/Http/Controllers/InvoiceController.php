@@ -58,17 +58,23 @@ class InvoiceController extends Controller
             ->orderBy($sortBy, $sortDir)
             ->paginate(25);
 
+        // $totals = (clone $query)
+        //     ->leftJoin('payments', function ($join) {
+        //         $join->on('payments.invoice_id', '=', 'invoices.id')
+        //             ->where('payments.status', PaymentStatus::Completed);
+        //     })
+        //     ->selectRaw('
+        //         SUM(invoices.total_amount) as totalAmount,
+        //         COALESCE(SUM(payments.amount), 0) as paidAmount
+        //     ')
+        //     ->first();
+
         $totals = (clone $query)
-            ->leftJoin('payments', function ($join) {
-                $join->on('payments.invoice_id', '=', 'invoices.id')
-                    ->where('payments.status', PaymentStatus::Completed);
-            })
             ->selectRaw('
                 SUM(invoices.total_amount) as totalAmount,
-                COALESCE(SUM(payments.amount), 0) as paidAmount
+                SUM(invoices.paid_amount) as paidAmount
             ')
             ->first();
-    
 
         $totalAmount = $totals->totalAmount ?? 0;
         $paidAmount = $totals->paidAmount ?? 0;
