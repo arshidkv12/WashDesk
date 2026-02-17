@@ -153,6 +153,7 @@
                                 </div>
                                 <p class="text-sm text-neutral-500 mt-2">
                                     Accepted formats: JPEG, PNG: 2MB.
+                                    (300 × 300 px)
                                 </p>
                             </div>
                         </div>

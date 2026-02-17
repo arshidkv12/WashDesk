@@ -35,8 +35,10 @@ class CompanyController extends Controller
         $validated = $request->validate([
             'company_name'    => 'required|string|max:255',
             'currency_symbol' => 'required|string|max:5',
-            'company_logo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'company_logo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048|dimensions:max_width=300,max_height=300',
             'company_address' => 'nullable|string|max:1000',
+        ],[
+            'company_logo.dimensions' => 'Logo must be maximum 300 × 300 pixels.',
         ]);
 
         $user = $request->user();
