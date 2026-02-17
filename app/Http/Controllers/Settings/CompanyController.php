@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 
 class CompanyController extends Controller
 {
@@ -44,8 +47,21 @@ class CompanyController extends Controller
             $filename = time().'_'.$file->getClientOriginalName();
 
             $file->move(public_path('uploads/logos'), $filename);
-
             $validated['company_logo'] = $filename;
+
+            $grayImagepath = public_path('uploads/logos/gray-' . $filename);
+            $filePath = public_path('uploads/logos/' . $filename);
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($filePath);
+            $image->resize(384, null, function ($c) {
+                    $c->aspectRatio();
+                    $c->upsize();
+                })
+                ->greyscale()
+                ->contrast(40)
+                ->brightness(10);   
+
+            $image->save($grayImagepath, 100);
         }
 
         $user->fill($validated);
@@ -60,9 +76,13 @@ class CompanyController extends Controller
         if ($user->company_logo) {
 
             $filePath = public_path('uploads/logos/' . $user->company_logo);
+            $grayImagepath = public_path('uploads/logos/gray-' . $user->company_logo);
 
             if (file_exists($filePath)) {
                 unlink($filePath);
+            }
+            if (file_exists($grayImagepath)) {
+                unlink($grayImagepath);
             }
 
             $user->company_logo = null;

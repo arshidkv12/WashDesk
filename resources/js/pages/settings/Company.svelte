@@ -33,7 +33,6 @@
     let logoFile: File | null = $state(null);
     let fileInput: HTMLInputElement | null = $state(null);
     
-    // Initialize logo preview with existing logo if available
     onMount(() => {
         if (user.company_logo) {
             logoPreview = `/uploads/logos/${user.company_logo}`;
