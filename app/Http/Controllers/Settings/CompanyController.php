@@ -32,21 +32,42 @@ class CompanyController extends Controller
         $validated = $request->validate([
             'company_name'    => 'required|string|max:255',
             'currency_symbol' => 'required|string|max:5',
-            'company_logo'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'company_logo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'company_address' => 'nullable|string|max:1000',
         ]);
 
         $user = $request->user();
 
         if ($request->hasFile('company_logo')) {
-            $path = $request->file('company_logo')->store('logos', 'public');
-            $validated['company_logo'] = $path; 
+
+            $file = $request->file('company_logo');
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            $file->move(public_path('uploads/logos'), $filename);
+
+            $validated['company_logo'] = $filename;
         }
 
         $user->fill($validated);
         $user->save();
 
         return to_route('company.edit');
+    }
+
+    public function removeLogo(Request $request)
+    {
+        $user = $request->user();
+        if ($user->company_logo) {
+
+            $filePath = public_path('uploads/logos/' . $user->company_logo);
+
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            $user->company_logo = null;
+            $user->save();
+        }
     }
 
     /**
