@@ -43,11 +43,11 @@
 
     let invoice = $state({
         due_date: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-        status: 'paid',
+        status: 'pending',
         notes: ''
     });
 
-    let status = $state('paid');
+    let status = $state('pending');
 
     let items = $state<InvoiceItem[]>([]);
 

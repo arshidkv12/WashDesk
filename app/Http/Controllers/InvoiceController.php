@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\InvoiceStatus;
-use App\Enums\PaymentStatus;
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Payment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -103,7 +101,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoice/Index', [
             'invoices' => $invoices,
             'csrf_token' => csrf_token(),
-            'statusOptions' => InvoiceStatus::options(),
+            'statusOptions' => OrderStatus::options(),
             'filters' => $request->only(['search', 'status', 'payment_status']),
             'sort_by' => $sortBy, 
             'sort_dir' => $sortDir,
@@ -135,7 +133,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoice/Create', [
             'initCustomerId' => $customer_id,
             'customers' => $customers,
-            'invoiceStatusOptions' => InvoiceStatus::options(),
+            'invoiceStatusOptions' => OrderStatus::options(),
             'csrf_token' => csrf_token()
         ]);
     
@@ -198,7 +196,7 @@ class InvoiceController extends Controller
         }
 
         Inertia::flash([
-            'message' => 'Invoice successfully',
+            'message' => 'Order successfully',
             'type' => 'success'
         ]);
         
@@ -216,7 +214,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoice/Show', [
             'invoice' => $invoice,
             'customer' => $invoice->customer,  
-            'invoiceStatusOptions' => InvoiceStatus::options(),
+            'invoiceStatusOptions' => OrderStatus::options(),
             'invoiceItems' => $invoice->items()->get(), 
         ]);
     }
@@ -250,7 +248,7 @@ class InvoiceController extends Controller
             'invoice' => $invoice,
             'invoiceItems' => $invoice->items()->get(), 
             'customers' => $customers,
-            'invoiceStatusOptions' => InvoiceStatus::options(),
+            'invoiceStatusOptions' => OrderStatus::options(),
             'csrf_token' => csrf_token()
         ]);
     }
@@ -315,7 +313,7 @@ class InvoiceController extends Controller
         }
 
         Inertia::flash([
-            'message' => 'Invoice updated successfully',
+            'message' => 'Order updated successfully',
             'type' => 'success'
         ]);
 
@@ -333,7 +331,7 @@ class InvoiceController extends Controller
         $invoice->delete();
 
         Inertia::flash([
-            'message' => 'Invoice deleted successfully',
+            'message' => 'Order deleted successfully',
             'type' => 'success'
         ]);
 

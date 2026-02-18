@@ -38,7 +38,7 @@
         { title: 'Create Invoice', href: '/invoices/create' },
     ];
 
-    let status = $state('draft');
+    let status = $state('pending');
 
     let items = $state<InvoiceItem[]>([]);
 
