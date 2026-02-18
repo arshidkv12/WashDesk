@@ -9,13 +9,13 @@
     import { Link, page, router } from '@inertiajs/svelte';
     import PaginationUi from '@/components/general/Pagination.svelte';
     import DeleteConfirmDialog from '@/components/confirm/DeleteConfirmDialog.svelte';
-    import Filter from '@/components/general/Filter.svelte';
     import { toast } from 'svelte-sonner';
     import SortIcon from '@/components/general/SortIcon.svelte';
     import { changeSort, getSortIcon } from '@/lib/helper/sortUtils';
     import Badge from '@/components/ui/badge/badge.svelte';
     import { type User as UserType } from '@/types';
     import { type InvoiceStatusOption } from '@/types/invoices';
+    import Filter from '@/components/invoice/Filter.svelte';
 
     let { invoices, filters, statusOptions, sort_by, sort_dir, totalAmount, paidAmount } = $props();
     // svelte-ignore state_referenced_locally
@@ -60,9 +60,9 @@
         <!-- Header -->
         <div class="p-4 md:p-6 md:pb-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight">Invoices</h1>
+                <h1 class="text-3xl font-bold tracking-tight">Orders</h1>
                 <p class="text-muted-foreground mt-1">
-                    Manage your invoices
+                    Manage your orders
                 </p>
             </div>
             <Link href="/invoices/create">
@@ -76,7 +76,7 @@
         <!-- Filters Card -->
         <Card class="shadow-none border-none py-0">
             <CardContent>
-                <Filter 
+                <Filter
                 routePath='invoices.index' 
                 bind:filters={localFilters} 
                 {statusOptions} 
@@ -88,7 +88,7 @@
         <Card class="shadow-none border-none  md:pt-0">
             <CardHeader class="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Invoice List</CardTitle>
+                    <!-- <CardTitle>Invoice List</CardTitle> -->
                     <CardDescription>
                         Showing {invoices.from} to {invoices.to} of {invoices.total} invoices
                         <div class="mt-2 flex items-center gap-3">

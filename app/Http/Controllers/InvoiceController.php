@@ -40,6 +40,27 @@ class InvoiceController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->has('payment_status') && $request->payment_status) {
+            switch ($request->payment_status) {
+                case 'paid':
+                    $query->whereColumn('paid_amount', '=', 'total_amount')
+                        ->where('total_amount', '>', 0);
+                    break;
+                    
+                case 'partial_payment':
+                    $query->where('paid_amount', '>', 0)
+                        ->whereColumn('paid_amount', '<', 'total_amount');
+                    break;
+                    
+                case 'unpaid':
+                    $query->where(function($q) {
+                        $q->where('paid_amount', 0)
+                        ->orWhereNull('paid_amount');
+                    })->where('total_amount', '>', 0);
+                    break;
+            }
+        }
+
         $allowedSorts = [
             'id',
             'created_at',
@@ -83,7 +104,7 @@ class InvoiceController extends Controller
             'invoices' => $invoices,
             'csrf_token' => csrf_token(),
             'statusOptions' => InvoiceStatus::options(),
-            'filters' => $request->only(['search', 'status']),
+            'filters' => $request->only(['search', 'status', 'payment_status']),
             'sort_by' => $sortBy, 
             'sort_dir' => $sortDir,
             'totalAmount' => $totalAmount,

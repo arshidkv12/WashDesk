@@ -53,6 +53,7 @@ export interface Filters {
     date_from?: string;
     date_to?: string;
     status?: string;
+    payment_status?: string;
     sort_by?: string;
     sort_dir?: string;
     [key: string]: string | number | undefined;
