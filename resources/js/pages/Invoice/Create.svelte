@@ -7,7 +7,7 @@
     import { Textarea } from '@/components/ui/textarea';
     import * as  Select from '@/components/ui/select';
     import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-    import { Plus, Trash2, Calendar, Save, User, FileText } from 'lucide-svelte';
+    import { Plus, Trash2, Calendar, Save, User, FileText, ArrowRightFromLine, ArrowLeftFromLine } from 'lucide-svelte';
     import { format } from 'date-fns';
     import CustomerSelect from '@/components/customer/CustomerSelect.svelte';
     import InputError from '@/components/InputError.svelte';
@@ -317,9 +317,22 @@
                                 <Input type="number" name='discount_amount' bind:value={discount_amount} min="0" step="0.01" />
                             </div>
 
-                            <div class="space-y-1">
+                           <div class="space-y-1">
                                 <Label>Paid Amount</Label>
-                                <Input type="number" name='paid_amount' bind:value={paid_amount} min="0" step="0.01" />
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1">
+                                        <Input type="number" name='paid_amount' bind:value={paid_amount} min="0" step="0.01" />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        size="icon"
+                                        onclick={() => paid_amount = total}
+                                        class="flex-shrink-0"
+                                        title="Set to total amount"
+                                    >
+                                        <ArrowLeftFromLine class="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
 
                             <div class="flex justify-between pt-2 border-t">
@@ -335,7 +348,7 @@
                                     <span>₹{Math.abs(balance_due).toFixed(2)}</span>
                                 {:else if balance_due === 0}
                                     <span>Paid in Full</span>
-                                    <span>₹0.00</span>
+                                    <span class="font-bold">✓</span>
                                 {:else}
                                     <span>Change to Return</span>
                                     <span>₹{Math.abs(balance_due).toFixed(2)}</span>
@@ -354,7 +367,6 @@
                                 <div class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                                 Saving...
                             {:else}
-                                <Save class="h-4 w-4" />
                                 Save Invoice
                             {/if}
                         </Button>
