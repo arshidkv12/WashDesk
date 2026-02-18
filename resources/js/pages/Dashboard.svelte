@@ -5,20 +5,11 @@
     import { Badge } from '@/components/ui/badge';
     import { Button } from '@/components/ui/button';
     import { Separator } from '@/components/ui/separator';
-    import {
-        Table,
-        TableHeader,
-        TableBody,
-        TableHead,
-        TableRow,
-        TableCell
-    } from '@/components/ui/table';
     import { type User as UserType } from '@/types';
     import {
         DollarSign,
         Package,
         Users,
-        Receipt,
         TrendingUp,
         TrendingDown,
         Clock,
@@ -29,10 +20,8 @@
         ChartColumn,
         Activity,
         CreditCard,
-        MapIcon,
-        Wrench,
-        CalendarDays,
         TrendingUpIcon,
+        ReceiptText
     } from 'lucide-svelte';
     import { Link, page } from '@inertiajs/svelte';
     import ApexCharts from 'apexcharts';
@@ -50,7 +39,7 @@
         ['DollarSign', DollarSign],
         ['Package', Package],
         ['Users', Users],
-        ['Receipt', Receipt],
+        ['ReceiptText', ReceiptText],
         ['TrendingUp', TrendingUp],
         ['TrendingDown', TrendingDown],
         ['Clock', Clock],
@@ -78,12 +67,7 @@
     let chart: any;
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(amount);
+        return (user.currency_symbol ?? '') + amount;
     };
 
     const formatValue = (value: number, decimals: number = 1) => {
@@ -499,52 +483,5 @@
                 {/if}
             </div>
         </div>
-
-        <!-- Recent Orders Table -->
-        {#if recentOrders && recentOrders.length > 0}
-            <div class="bg-white rounded-lg border p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-lg font-semibold">Recent Orders</h3>
-                        <p class="text-sm text-gray-500">Latest transactions</p>
-                    </div>
-                    <Button variant="ghost" size="sm" href="/invoices" class="gap-2">
-                        View All
-                        <ArrowRight class="h-4 w-4" />
-                    </Button>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow class="bg-gray-50">
-                                <TableHead class="font-semibold">Invoice</TableHead>
-                                <TableHead class="font-semibold">Customer</TableHead>
-                                <TableHead class="font-semibold">Items</TableHead>
-                                <TableHead class="font-semibold">Amount</TableHead>
-                                <TableHead class="font-semibold">Status</TableHead>
-                                <TableHead class="font-semibold">Time</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {#each recentOrders as order}
-                                <TableRow class="hover:bg-gray-50 transition-colors">
-                                    <TableCell class="font-medium text-blue-600">{order.invoice}</TableCell>
-                                    <TableCell>{order.customer}</TableCell>
-                                    <TableCell>{order.items} items</TableCell>
-                                    <TableCell class="font-semibold">{formatCurrency(order.amount)}</TableCell>
-                                    <TableCell>
-                                        <Badge class={`${getStatusBadgeColor(order.status)} px-3 py-1`}>
-                                            {order.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell class="text-gray-500 text-sm">{order.time}</TableCell>
-                                </TableRow>
-                            {/each}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
-        {/if}
     </div>
 </AppLayout>

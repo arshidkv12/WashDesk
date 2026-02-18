@@ -9,43 +9,61 @@ use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $userId = Auth::user()->id;
+        // Cache dashboard data for 1 hour (3600 seconds)
+        $dashboardData = Cache::remember("dashboard_data_{$userId}", 3600, function () {
+            return $this->generateDashboardData();
+        });
+
+        return Inertia::render('Dashboard', $dashboardData);
+    }
+
+    private function generateDashboardData()
+    {
+        
         // Current date range
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+        $userId = Auth::user()->id;
 
-        // Current month stats
-        $currentMonthStats = [
-            'revenue' => Invoice::whereBetween('created_at', [$startOfMonth, $now])
-                ->sum('paid_amount'),
-            
-            'invoices' => Invoice::whereBetween('created_at', [$startOfMonth, $now])->count(),
-            
-            'customers' => Customer::whereBetween('created_at', [$startOfMonth, $now])->count(),
-            
-            'outstanding' => Invoice::whereBetween('created_at', [$startOfMonth, $now])
-                ->sum(DB::raw('total_amount - paid_amount')),
-        ];
+        // Cache individual heavy queries if needed
+        $currentMonthStats = Cache::remember("current_month_stats_{$userId}", 1800, function () use ($startOfMonth, $now) {
+            return [
+                'revenue' => Invoice::whereBetween('created_at', [$startOfMonth, $now])
+                    ->sum('paid_amount'),
+                
+                'invoices' => Invoice::whereBetween('created_at', [$startOfMonth, $now])->count(),
+                
+                'customers' => Customer::whereBetween('created_at', [$startOfMonth, $now])->count(),
+                
+                'outstanding' => Invoice::whereBetween('created_at', [$startOfMonth, $now])
+                    ->sum(DB::raw('total_amount - paid_amount')),
+            ];
+        });
 
-        // Last month stats for comparison
-        $lastMonthStats = [
-            'revenue' => Invoice::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-                ->sum('paid_amount'),
-            
-            'invoices' => Invoice::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count(),
-            
-            'customers' => Customer::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count(),
-            
-            'outstanding' => Invoice::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
-                ->sum(DB::raw('total_amount - paid_amount')),
-        ];
+        $lastMonthStats = Cache::remember("last_month_stats_{$userId}", 3600, function () use ($startOfLastMonth, $endOfLastMonth) {
+            return [
+                'revenue' => Invoice::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+                    ->sum('paid_amount'),
+                
+                'invoices' => Invoice::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count(),
+                
+                'customers' => Customer::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count(),
+                
+                'outstanding' => Invoice::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+                    ->sum(DB::raw('total_amount - paid_amount')),
+            ];
+        });
 
         $stats = [
             [
@@ -80,53 +98,59 @@ class DashboardController extends Controller
                 'value' => $currentMonthStats['outstanding'],
                 'change' => $this->calculateChange($currentMonthStats['outstanding'], $lastMonthStats['outstanding']),
                 'trend' => $this->getTrend($currentMonthStats['outstanding'], $lastMonthStats['outstanding'], true),
-                'icon' => 'Receipt',
+                'icon' => 'ReceiptText',
                 'color' => 'text-amber-600',
                 'bgColor' => 'bg-amber-100',
             ],
         ];
 
-        $recentOrders = Invoice::with('customer')
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(function ($invoice) {
-                return [
-                    'id' => $invoice->id,
-                    'invoice' => $invoice->invoice_no ?? 'INV-' . str_pad($invoice->id, 5, '0', STR_PAD_LEFT),
-                    'customer' => $invoice->customer->name ?? 'Guest',
-                    'amount' => $invoice->total_amount,
-                    'status' => $invoice->status,
-                    'time' => $invoice->created_at->diffForHumans(),
-                    'items' => $invoice->items()->count(),
-                ];
-            });
+        // Cache recent orders (short TTL since they change frequently)
+        // $recentOrders = Cache::remember("recent_orders_{$userId}", 300, function () {
+        //     return Invoice::with('customer')
+        //         ->latest()
+        //         ->limit(5)
+        //         ->get()
+        //         ->map(function ($invoice) {
+        //             return [
+        //                 'id' => $invoice->id,
+        //                 'invoice' => $invoice->invoice_no ?? 'INV-' . str_pad($invoice->id, 5, '0', STR_PAD_LEFT),
+        //                 'customer' => $invoice->customer->name ?? 'Guest',
+        //                 'amount' => $invoice->total_amount,
+        //                 'status' => $invoice->status,
+        //                 'time' => $invoice->created_at->diffForHumans(),
+        //                 'items' => $invoice->items()->count(),
+        //             ];
+        //         });
+        // });
 
-        $startDate = now()->subDays(29)->startOfDay();
-        $endDate = now()->endOfDay();
-        
-        $rawDaily = Invoice::selectRaw('DATE(created_at) as date, SUM(paid_amount) as total')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('date')
-            ->pluck('total', 'date');
-
-        $dailyPerformance = collect(range(29, 0))->map(function ($daysAgo) use ($rawDaily) {
-            $date = now()->subDays($daysAgo)->toDateString();
-            $dayNumber = now()->subDays($daysAgo)->format('d');
-            $dayName = now()->subDays($daysAgo)->format('D');
-            $fullDate = now()->subDays($daysAgo)->format('M d');
+        // Cache daily performance (30 days) - changes daily, so 1 hour is fine
+        $dailyPerformance = Cache::remember("daily_performance_{$userId}", 3600, function () {
+            $startDate = now()->subDays(29)->startOfDay();
+            $endDate = now()->endOfDay();
             
-            $value = (float) ($rawDaily[$date] ?? 0);
+            $rawDaily = Invoice::selectRaw('DATE(created_at) as date, SUM(paid_amount) as total')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupBy('date')
+                ->pluck('total', 'date');
 
-            return [
-                'day' => $dayNumber,
-                'date' => $date,
-                'fullDate' => $fullDate,
-                'dayName' => $dayName,
-                'label' => $dayName . ' ' . $dayNumber,
-                'value' => $value / 1000, // Convert to thousands (K) without rounding
-                'originalValue' => $value,
-            ];
+            return collect(range(29, 0))->map(function ($daysAgo) use ($rawDaily) {
+                $date = now()->subDays($daysAgo)->toDateString();
+                $dayNumber = now()->subDays($daysAgo)->format('d');
+                $dayName = now()->subDays($daysAgo)->format('D');
+                $fullDate = now()->subDays($daysAgo)->format('M d');
+                
+                $value = (float) ($rawDaily[$date] ?? 0);
+
+                return [
+                    'day' => $dayNumber,
+                    'date' => $date,
+                    'fullDate' => $fullDate,
+                    'dayName' => $dayName,
+                    'label' => $dayName . ' ' . $dayNumber,
+                    'value' => $value / 1000,
+                    'originalValue' => $value,
+                ];
+            })->values();
         });
 
         $weeklyPerformance = [
@@ -138,6 +162,7 @@ class DashboardController extends Controller
             ),
         ];
 
+        // Today's stats - don't cache or cache very briefly
         $today = Carbon::today();
         $todayRevenue = Invoice::whereDate('created_at', $today)->sum('paid_amount');
         $todayAvgOrder = Invoice::whereDate('created_at', $today)->avg('paid_amount');
@@ -169,13 +194,13 @@ class DashboardController extends Controller
             'busyLevel' => $this->calculateBusyLevel(),
         ];
 
-        return Inertia::render('Dashboard', [
+        return [
             'stats' => $stats,
-            'recentOrders' => $recentOrders,
+            // 'recentOrders' => $recentOrders,
             'dailyPerformance' => $dailyPerformance,
             'weeklyPerformance' => $weeklyPerformance,
             'quickStats' => $quickStats,
-            'currentMonth' => $now->format('F Y'),
+            'currentMonth' => now()->format('F Y'),
             'statusOptions' => InvoiceStatus::options(),
             'chartConfig' => [
                 'colors' => [
@@ -185,7 +210,7 @@ class DashboardController extends Controller
                     'danger' => '#ef4444',
                 ],
             ],
-        ]);
+        ];
     }
 
     private function calculateChange($current, $previous)
