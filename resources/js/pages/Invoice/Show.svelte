@@ -3,7 +3,7 @@
     import { Button } from '@/components/ui/button';
     import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
     import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-    import { Eye, Printer, Download, Mail, Edit, Calendar, User, FileText, DollarSign, Hash, MapPin, Phone, Mail as MailIcon, Globe } from 'lucide-svelte';
+    import { Eye, Printer, Download, Mail, SquarePen, User, FileText, DollarSign, Hash, MapPin, Phone, Mail as MailIcon, Globe } from 'lucide-svelte';
     import { format } from 'date-fns';
     import { type Invoice, type InvoiceItem, type InvoiceStatusOption } from '@/types/invoices';
     import { type Customer } from '@/types/customers';
@@ -13,6 +13,9 @@
     import { toast } from 'svelte-sonner';
     import { Link } from '@/components/ui/breadcrumb';
     import { type User as UserType } from '@/types';
+    import printJS from 'print-js';
+    import { stubFalse } from 'lodash';
+    import { onDestroy, onMount } from 'svelte';
 
     let { invoice, customer, invoiceItems, invoiceStatusOptions } = $props() as {
         invoice: Invoice;
@@ -59,6 +62,30 @@
         }
     });
 
+    function handlePrint() {
+        printJS({
+            printable: '/print/' + invoice.id,
+            type: 'pdf',
+            showModal: false  
+        });
+    }
+
+    function handlePrintCommand(event:any) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+            event.preventDefault();  
+            console.log('📋 Print command detected');
+            handlePrint();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener('keydown', handlePrintCommand);
+    });
+
+    onDestroy(() => { 
+        window.removeEventListener('keydown', handlePrintCommand);
+    });
+
     const user = $page.props.auth.user as UserType;
 
 </script>
@@ -81,20 +108,22 @@
                         {invoiceStatusOptions.find(s => s.value === invoice.status)?.label || invoice.status}
                     </Badge>
                     <div class="flex gap-2">
-                        <Button variant="outline" size="sm" onclick={() => window.print()}>
+                        <Button variant="outline" size="sm" onclick={handlePrint}>
                             <Printer class="h-4 w-4 mr-2" />
                             Print
                         </Button>
-                        <Button variant="outline" size="sm">
-                            <Download class="h-4 w-4 mr-2" />
-                            Download PDF
-                        </Button>
-                        <Button variant="outline" size="sm">
+                        <Link href={`/print/${invoice.id}?download=1`}>
+                            <Button variant="outline" size="sm">
+                                <Download class="h-4 w-4 mr-2" />
+                                Download PDF
+                            </Button>
+                        </Link>
+                        <!-- <Button variant="outline" size="sm">
                             <Mail class="h-4 w-4 mr-2" />
                             Send
-                        </Button>
+                        </Button> -->
                         <Button size="sm" onclick={() => window.location.href = `/invoices/${invoice.id}/edit`}>
-                            <Edit class="h-4 w-4 mr-2" />
+                            <SquarePen class="h-4 w-4 mr-2" />
                             Edit
                         </Button>
                     </div>
@@ -246,21 +275,23 @@
                     </CardHeader>
                     <CardContent class="space-y-3">
                         <Button class="w-full" onclick={() => window.location.href = `/invoices/${invoice.id}/edit`}>
-                            <Edit class="h-4 w-4 mr-2" />
+                            <SquarePen class="h-4 w-4 mr-2" />
                             Edit Invoice
                         </Button>
                         <Button variant="outline" class="w-full" onclick={() => window.print()}>
                             <Printer class="h-4 w-4 mr-2" />
                             Print Invoice
                         </Button>
-                        <Button variant="outline" class="w-full">
-                            <Download class="h-4 w-4 mr-2" />
-                            Download PDF
-                        </Button>
-                        <Button variant="outline" class="w-full">
+                        <Link href={`/print/${invoice.id}?download=1`}>
+                            <Button variant="outline" class="w-full">
+                                <Download class="h-4 w-4 mr-2" />
+                                Download PDF
+                            </Button>
+                        </Link>
+                        <!-- <Button variant="outline" class="w-full">
                             <Mail class="h-4 w-4 mr-2" />
                             Send to Customer
-                        </Button>
+                        </Button> -->
                         {#if invoice.status === 'sent' || invoice.status === 'partial'}
                             <Button variant="outline" class="w-full bg-green-50 text-green-700 hover:bg-green-100">
                                 <DollarSign class="h-4 w-4 mr-2" />

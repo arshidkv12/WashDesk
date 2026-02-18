@@ -9,6 +9,7 @@ use App\Models\Order;
 use Mpdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class UtilityController extends Controller
 {
@@ -34,7 +35,10 @@ class UtilityController extends Controller
             'balance_due' => $order->total_amount - $order->paid_amount,
         ];
 
-        $html = view('invoices.3-invoice', $data)->render();
+        $template = View::exists('invoices.'.$user->id.'template') ? 
+                       'invoices.'.$user->id.'template' :  'invoices.3-invoice';
+
+        $html = view($template, $data)->render();
 
         $defaultConfig = (new ConfigVariables())->getDefaults();
         $fontDirs = $defaultConfig['fontDir'];
@@ -63,6 +67,7 @@ class UtilityController extends Controller
         ]);
 
         $mpdf->WriteHTML($html);
-        return $mpdf->Output('invoice-'.$order_id.'.pdf', 'I');
+        $download = request('download') == 1 ? 'D' : 'I';
+        return $mpdf->Output('invoice-'.$order_id.'.pdf', $download );
     }
 }
