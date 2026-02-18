@@ -40,7 +40,7 @@
         }
         
         .laundry-header h1 {
-            font-size: 20px;
+            font-size: 15px;
             margin: 0;
             text-transform: uppercase;
             font-weight: bold;
@@ -200,8 +200,11 @@
 <body>
     <!-- Header -->
     <div class="laundry-header">
-        <h1>{{ $site_name }}</h1>
-        <div class="tagline">{{ $site_description }}</div>
+        @if($company_logo)
+            <img style="padding:5mm; padding-right:10mm; padding-left:10mm" src="{{public_path('uploads/logos/gray-' . $company_logo)}}" />
+        @endif
+        <h1>{{ $company_name }}</h1>
+        <div class="tagline">{!! $site_description !!}</div>
     </div>
 
     <!-- Bill Reference -->
@@ -211,25 +214,21 @@
             <td class="text-right font-bold">#{{ str_pad($invoiceNumber, 6, '0', STR_PAD_LEFT) }}</td>
         </tr>
         <tr>
-            <td class="label">Date:</td>
-            <td class="text-right">{{ $date }}</td>
-        </tr>
-        <tr>
-            <td class="label">Time:</td>
-            <td class="text-right">{{ $time }}</td>
+            <td class="label">Date & Time</td>
+            <td class="text-right">{{ $time . ' - ' . $date }}</td>
         </tr>
     </table>
 
     <!-- Customer Information -->
-    <table class="customer-info">
+    {{-- <table class="customer-info">
         <tr>
             <td class="info-label">Customer:</td>
-            <td><strong>{{ $customer_name ?? 'Walk-in Customer' }}</strong></td>
+            <td class="text-right"><strong>{{ $order->customer->name ?? 'Walk-in Customer' }}</strong></td>
         </tr>
-        @if(isset($customer_phone))
+        @if(isset($order->customer->phone))
         <tr>
             <td class="info-label">Phone:</td>
-            <td>{{ $customer_phone }}</td>
+            <td class="text-right">{{ $order->customer->phone }}</td>
         </tr>
         @endif
         @if(isset($customer_address))
@@ -244,7 +243,7 @@
             <td>{{ $membership_id }} <span class="text-xs">({{ $membership_type ?? 'Regular' }})</span></td>
         </tr>
         @endif
-    </table>
+    </table> --}}
 
     <!-- Service Items -->
     <table class="items-table">
@@ -383,16 +382,16 @@
             </tr>
         @endforeach
         
-        @if(isset($discount) && $discount > 0)
+        @if(isset($order->discount_amount) && $order->discount_amount > 0)
         <tr>
             <td>Discount:</td>
-            <td class="text-right">-{{ number_format($discount, 2) }}</td>
+            <td class="text-right">-{{ number_format($order->discount_amount, 2) }}</td>
         </tr>
         @endif
         
         <tr class="grand-total">
             <td class="font-bold">TOTAL</td>
-            <td class="text-right font-bold">{{ number_format($grand_total, 2) }}</td>
+            <td class="text-right font-bold">{{ number_format($order->total_amount, 2) }}</td>
         </tr>
     </table>
     
@@ -442,7 +441,7 @@
     <div class="laundry-footer">
         <div colspan="4" class="dash-line">-------------------------------------------</div>
         <div class="thanks-message">Thank you for choosing !</div>
-        <div class="footer-note">{{ $site_description }}</div>
+        <div class="footer-note"></div>
         @if(isset($contact_number))
         <div class="footer-note">Call: {{ $contact_number }}</div>
         @endif

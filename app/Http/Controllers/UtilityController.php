@@ -8,25 +8,28 @@ use Mpdf\Config\FontVariables;
 use App\Models\Order;
 use Mpdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UtilityController extends Controller
 {
 
     public function print($order_id)
     {   
-        $order = Invoice::with('items')->findOrFail( $order_id );
-        $currency_symbol = config('settings.currency_symbol');
-        $site_name = config('settings.site_name');
-        $site_description = config('settings.site_description');
+        $user = Auth::user();
+        $order = Invoice::with('items')->with('customer')->findOrFail( $order_id );
+        $currency_symbol = $user->currency_symbol;
+        $company_name = $user->company_name;
         $data = [
-            'invoiceNumber' => $order->invoice_number,
-            'date' => $order->created_at->format('M d, Y'),
-            'time' => $order->created_at->format('h:i:s A'),
+            'invoiceNumber' => $order->invoice_no,
+            'date' => $order->created_at->format('M d,Y'),
+            'time' => $order->created_at->format('h:iA'),
             'items' => $order->items,
             'order' => $order,
             'currency_symbol' => $currency_symbol,
-            'site_name' => $site_name,
-            'site_description' => $site_description,
+            'company_name' => $company_name,
+            'company_logo' => $user->company_logo,
+            'company_name' => $company_name,
+            'site_description' => nl2br($user->company_address),
             'balance_due' => $order->total_amount - $order->paid_amount,
             'balance_due' => $order->total_amount - $order->paid_amount,
         ];
