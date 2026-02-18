@@ -100,7 +100,6 @@ class CompanyController extends Controller
 
     /**
      * Remove transparency by flattening on white background
-     * (Copied from escpos-php library)
      */
     private function alphaRemove(\Imagick $im): \Imagick
     {
