@@ -34,8 +34,8 @@
 
     const breadcrumbs = [
         { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Invoices', href: '/invoices' },
-        { title: 'Create Invoice', href: '/invoices/create' },
+        { title: 'Orders', href: '/orders' },
+        { title: 'Edit Order', href: '' },
     ];
 
     let status = $state('pending');
@@ -93,8 +93,8 @@
         
             <!-- Header -->
             <div class="mb-6">
-                <h1 class="text-2xl font-bold text-gray-900">Create Invoice</h1>
-                <p class="text-gray-600">Fill in the details below to create a new invoice</p>
+                <h1 class="text-2xl font-bold text-gray-900">Edit Order</h1>
+                <p class="text-gray-600">Fill in the details below to create a new order</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -124,7 +124,7 @@
                     <CardHeader class="flex flex-row items-center justify-between">
                         <CardTitle class="flex items-center gap-2">
                             <FileText class="h-5 w-5" />
-                            Invoice Items
+                            Order Items
                         </CardTitle>
                         <Button type="button" size="sm" onclick={() => {
                             items = [...items, { 
@@ -257,7 +257,7 @@
                     <!-- Status Card -->
                     <Card>
                     <CardHeader>
-                        <CardTitle>Invoice Status</CardTitle>
+                        <CardTitle>Order Status</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Select.Root type="single" bind:value={status} name="status">
