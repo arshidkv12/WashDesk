@@ -5,6 +5,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JobCardController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UtilityController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -36,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('services.search');
     Route::resource('services', ServiceController::class); 
     Route::resource('invoices', InvoiceController::class); 
+    Route::get('/print/{id}',  [UtilityController::class, 'print']);
 });
 
 require __DIR__ . '/settings.php';
