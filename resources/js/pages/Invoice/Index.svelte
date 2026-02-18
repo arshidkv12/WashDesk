@@ -68,7 +68,7 @@
             <Link href="/invoices/create">
                 <Button class="gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700">
                     <Plus class="h-4 w-4" />
-                    Add Invoice
+                    Add Orders
                 </Button>
             </Link>
         </div>
@@ -90,7 +90,7 @@
                 <div>
                     <!-- <CardTitle>Invoice List</CardTitle> -->
                     <CardDescription>
-                        Showing {invoices.from} to {invoices.to} of {invoices.total} invoices
+                        Showing {invoices.from} to {invoices.to} of {invoices.total} orders
                         <div class="mt-2 flex items-center gap-3">
                             <Badge variant="outline" class="bg-background">
                                 Total: {user.currency_symbol}{totalAmount}
@@ -232,7 +232,7 @@
                                                     <Link href="/invoices/create">
                                                         <Button size="sm">
                                                             <Plus class="mr-2 h-4 w-4" />
-                                                            Add Invoice
+                                                            Add Order
                                                         </Button>
                                                     </Link>
                                                 {/if}
