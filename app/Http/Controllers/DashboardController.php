@@ -86,7 +86,6 @@ class DashboardController extends Controller
             ],
         ];
 
-        // Recent Invoices
         $recentOrders = Invoice::with('customer')
             ->latest()
             ->limit(5)
@@ -103,8 +102,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Daily performance (last 30 days) - FIXED: Changed from weekly to daily
-        $startDate = now()->subDays(29)->startOfDay(); // 30 days including today
+        $startDate = now()->subDays(29)->startOfDay();
         $endDate = now()->endOfDay();
         
         $rawDaily = Invoice::selectRaw('DATE(created_at) as date, SUM(paid_amount) as total')
@@ -112,31 +110,51 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->pluck('total', 'date');
 
-        // Generate last 30 days with proper day numbers
         $dailyPerformance = collect(range(29, 0))->map(function ($daysAgo) use ($rawDaily) {
             $date = now()->subDays($daysAgo)->toDateString();
-            $dayNumber = now()->subDays($daysAgo)->format('d'); // Get day of month
-            $dayName = now()->subDays($daysAgo)->format('D'); // Get short day name
+            $dayNumber = now()->subDays($daysAgo)->format('d');
+            $dayName = now()->subDays($daysAgo)->format('D');
+            $fullDate = now()->subDays($daysAgo)->format('M d');
             
             $value = (float) ($rawDaily[$date] ?? 0);
 
             return [
-                'day' => $dayNumber, // Use day number for label
+                'day' => $dayNumber,
                 'date' => $date,
-                'label' => $dayName . ' ' . $dayNumber, // Combined label if needed
-                'value' => round($value / 1000, 2), // Convert to millions
+                'fullDate' => $fullDate,
+                'dayName' => $dayName,
+                'label' => $dayName . ' ' . $dayNumber,
+                'value' => $value / 1000, // Convert to thousands (K) without rounding
+                'originalValue' => $value,
             ];
         });
 
-        // Quick stats for today
+        $weeklyPerformance = [
+            'thisWeek' => $dailyPerformance->slice(0, 7)->sum('value'),
+            'lastWeek' => $dailyPerformance->slice(7, 7)->sum('value'),
+            'weekOverWeekGrowth' => $this->calculateGrowth(
+                $dailyPerformance->slice(0, 7)->sum('value'),
+                $dailyPerformance->slice(7, 7)->sum('value')
+            ),
+        ];
+
         $today = Carbon::today();
         $todayRevenue = Invoice::whereDate('created_at', $today)->sum('paid_amount');
         $todayAvgOrder = Invoice::whereDate('created_at', $today)->avg('paid_amount');
         
+        $formatCurrency = function($amount) {
+            if ($amount >= 1000000) {
+                return round($amount / 1000000, 2) . 'M';
+            } elseif ($amount >= 1000) {
+                return round($amount / 1000, 1) . 'K';
+            } else {
+                return (string) number_format($amount, 2, '.', '');
+            }
+        };
+
         $quickStats = [
-            'todayRevenue' => $todayRevenue >= 1000000 
-                ? round($todayRevenue / 1000000, 1) . 'M' 
-                : round($todayRevenue / 1000, 0) . 'K',
+            'todayRevenue' => $formatCurrency($todayRevenue),
+            'todayRevenueRaw' => $todayRevenue,
             'processing' => Invoice::whereDate('created_at', $today)
                 ->where('status', 'processing')
                 ->count(),
@@ -146,19 +164,27 @@ class DashboardController extends Controller
             'completed' => Invoice::whereDate('created_at', $today)
                 ->where('status', 'completed')
                 ->count(),
-            'averageOrderValue' => $todayAvgOrder 
-                ? (round($todayAvgOrder / 1000, 0) . 'K') 
-                : '0K',
+            'averageOrderValue' => $todayAvgOrder ? $formatCurrency($todayAvgOrder) : '0',
+            'averageOrderValueRaw' => $todayAvgOrder ?? 0,
             'busyLevel' => $this->calculateBusyLevel(),
         ];
 
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'recentOrders' => $recentOrders,
-            'dailyPerformance' => $dailyPerformance, 
+            'dailyPerformance' => $dailyPerformance,
+            'weeklyPerformance' => $weeklyPerformance,
             'quickStats' => $quickStats,
             'currentMonth' => $now->format('F Y'),
             'statusOptions' => InvoiceStatus::options(),
+            'chartConfig' => [
+                'colors' => [
+                    'primary' => '#3b82f6',
+                    'secondary' => '#10b981',
+                    'warning' => '#f59e0b',
+                    'danger' => '#ef4444',
+                ],
+            ],
         ]);
     }
 
@@ -166,6 +192,12 @@ class DashboardController extends Controller
     {
         if ($previous == 0) return 100;
         return round((($current - $previous) / $previous) * 100, 1);
+    }
+
+    private function calculateGrowth($current, $previous)
+    {
+        if ($previous == 0) return 0;
+        return (($current - $previous) / $previous) * 100;
     }
 
     private function getTrend($current, $previous, $inverse = false)
@@ -180,30 +212,36 @@ class DashboardController extends Controller
 
     private function calculateBusyLevel()
     {
-        // Calculate business busy level based on current invoices vs capacity
         $totalInvoices = Invoice::whereDate('created_at', Carbon::today())->count();
-        $maxCapacity = 50; // Set your max daily capacity
+        $maxCapacity = 50;
         
         return min(round(($totalInvoices / $maxCapacity) * 100), 100);
     }
 
-    // Optional: API endpoint for real-time updates
     public function getQuickStats()
     {
         $today = Carbon::today();
         $todayRevenue = Invoice::whereDate('created_at', $today)->sum('paid_amount');
         
+        $formatCurrency = function($amount) {
+            if ($amount >= 1000000) {
+                return round($amount / 1000000, 2) . 'M';
+            } elseif ($amount >= 1000) {
+                return round($amount / 1000, 1) . 'K';
+            } else {
+                return (string) $amount;
+            }
+        };
+        
         return response()->json([
-            'todayRevenue' => $todayRevenue >= 1000000 
-                ? round($todayRevenue / 1000000, 1) . 'M' 
-                : round($todayRevenue / 1000, 0) . 'K',
+            'todayRevenue' => $formatCurrency($todayRevenue),
+            'todayRevenueRaw' => $todayRevenue,
             'processing' => Invoice::whereDate('created_at', $today)
                 ->where('status', 'processing')
                 ->count(),
             'ready' => Invoice::whereDate('created_at', $today)
                 ->where('status', 'ready')
                 ->count(),
-            'busyLevel' => $this->calculateBusyLevel(),
         ]);
     }
 }

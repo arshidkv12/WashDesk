@@ -278,7 +278,7 @@
                             <SquarePen class="h-4 w-4 mr-2" />
                             Edit Invoice
                         </Button>
-                        <Button variant="outline" class="w-full" onclick={() => window.print()}>
+                        <Button variant="outline" class="w-full" onclick={handlePrint}>
                             <Printer class="h-4 w-4 mr-2" />
                             Print Invoice
                         </Button>
